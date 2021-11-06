@@ -1,22 +1,29 @@
+library(stringi)
+library(ggplot2)
+#####################################################
+
 df1 = read.csv("CRISPR_gene_dependency.csv")
 df2 = read.csv("sample_info.csv")
-
 
 df1$DepMap_ID %in% df2$DepMap_ID
 length(which(df1$DepMap_ID %in% df2$DepMap_ID)) # as the n of df1
 
-# (de-)Capitalize columns
-unique(df2$primary_disease)
-unique(df2$sample_collection_site)
+# ♠ RMK: lines from 14 up to 64 deal with the whole df2, so that we have a
+# ♠      general overview
 
-library(stringi)
+
+# ♫ # (de-)Capitalize columns
+unique(df2$primary_disease)
 df2$primary_disease = stri_trans_totitle(df2$primary_disease)
 unique(df2$primary_disease)
-df2$sample_collection_site = stri_trans_tolower(df2$sample_collection_site)
+
+unique(df2$sample_collection_site)
+df2$sample_collection_site = chartr(old = "_", new = " ", df2$sample_collection_site)
+df2$sample_collection_site = stri_trans_totitle(df2$sample_collection_site)
 unique(df2$sample_collection_site)
 
 
-# Looking for weird obs labels
+# ♫ # Looking for weird obs labels
 length(which(df2$primary_disease == "Unknown"))
 which(df2$primary_disease == "Unknown") # obs >1032 --> not in df1
 
@@ -35,5 +42,48 @@ df2$sample_collection_site[c(49, 64, 170, 494, 641)]
 # just 5 and each from different site --> ok to delete
 
 
-# RMK: also lineage can be used as Cancer type classifications, but seems more complicated
-# --> idea: use it as double check (to do)
+# RMK: also lineage can be used as Cancer type classifications, but seems 
+#      more complicated (since more details)
+# --> idea: use it as double check for engineered:
+df2$lineage = chartr(old = "_", new = " ", df2$lineage)
+df2$lineage = stri_trans_totitle(df2$lineage)
+unique(df2$lineage)
+# More obs than primary_disease: just with a quick look, we see engineered
+# is divided in about 10 other categories 
+which(startsWith(df2$lineage, "Engineered"))
+# Same 5 initial obs as before --> ok!
+which(startsWith(df2$lineage, "Engineered")) %in% which(df2$primary_disease == "Engineered")
+# only last obs do not corresponds to primary disease
+
+# CONLUSION: it is ok to delete those engineered obs (if it is the case)
+
+
+# ♫ # Comparison btw primary_disease and sample_collection_site
+cat("n. diseases =", length(unique(df2$lineage)), 
+    "VS. n. sites =", length(unique(df2$sample_collection_site)))
+
+# ♠ more sites than disease: some different sites lead to same disease?
+# ♠ Or is it related to unknown?
+
+
+
+# ♫ # Counts obs wrt primary disease
+trunc_df2 = df2[1:1032,]
+type = unique(trunc_df2$primary_disease)
+
+num = rep(0, length(type))
+for (i in 1:length(type)){
+  num[i] = length(which(trunc_df2$primary_disease == type[i]))
+}
+
+CancerCount = data.frame(cbind(type, num))
+CancerCount$num = as.numeric(CancerCount$num)
+
+ggplot(CancerCount, aes(x = type, y = num, color = type)) +
+  geom_point(lwd = 3) +
+  ggtitle("Number of cancer types") +
+  labs(x = "Type of cancer", y = "How many obs") +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1), 
+        plot.title = element_text(hjust = 0.5))
+
+# ♠ Se lo teniamo (ma non penso proprio), aggiungere le linee verticali
