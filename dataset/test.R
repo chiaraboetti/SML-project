@@ -1,6 +1,7 @@
 library(stringi)
 library(ggplot2)
 library(dplyr)
+library(knitr)
 #####################################################
 
 df1 = read.csv("CRISPR_gene_dependency.csv")
@@ -9,7 +10,7 @@ df2 = read.csv("sample_info.csv")
 df1$DepMap_ID %in% df2$DepMap_ID
 length(which(df1$DepMap_ID %in% df2$DepMap_ID)) # as the n of df1
 
-# ♠ RMK: lines from 14 up to 64 deal with the whole df2, so that we have a
+# ♠ RMK: lines from 17 up to 64 deal with the whole df2, so that we have a
 # ♠      general overview
 
 
@@ -55,34 +56,50 @@ which(startsWith(df2$lineage, "Engineered"))
 # Same 5 initial obs as before --> ok!
 which(startsWith(df2$lineage, "Engineered")) %in% which(df2$primary_disease == "Engineered")
 # only last obs do not corresponds to primary disease
-
 # CONLUSION: it is ok to delete those engineered obs (if it is the case)
 
 
 # ♫ # Comparison btw primary_disease and sample_collection_site
-cat("n. diseases =", length(unique(df2$lineage)), 
+cat("n. diseases =", length(unique(df2$primary_disease)), 
     "VS. n. sites =", length(unique(df2$sample_collection_site)))
 
-# ♠ more sites than disease: some different sites lead to same disease?
-# ♠ Or is it related to unknown?
+CancerSiteCount = df2[1:1032, ] %>%
+  select(DepMap_ID, primary_disease, sample_collection_site) %>%
+  rename(disease = primary_disease,
+         site = sample_collection_site)
+
+CancerSiteCount %>%
+  group_by(disease, site) %>% 
+  summarise(count = n()) %>%
+  kable()
+# Stranger things: probably it is not a good idea looking at the sample site for the clusters
+
+ggplot(CancerSiteCount, aes(x = disease)) +
+  geom_histogram(aes(fill = site), stat = "count") +
+  ggtitle("Number of cancer per site") +
+  labs(x = "Type of cancer", y = "How many obs") +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1), 
+        plot.title = element_text(hjust = 0.5))
+# CONCLUSION: just stick to the primary_disease for clusters 
 
 
-
-# ♫ # Counts obs wrt primary disease
+# ♫ # Count obs wrt primary disease
 trunc_df2 = df2[1:1032,]
-
-CancerCount = trunc_df2 %>%
-  group_by(primary_disease) %>%
-  summarise(count=n())
-
-CancerCount = data.frame(CancerCount)
-
-ggplot(CancerCount, aes(x = primary_disease, y = count, color = primary_disease)) +
-  geom_point(lwd = 3) +
+ggplot(trunc_df2, aes(x = primary_disease)) +
+  geom_histogram(aes(fill = primary_disease), stat = "count") +
   ggtitle("Number of cancer types") +
   labs(x = "Type of cancer", y = "How many obs") +
   theme(axis.text.x = element_text(angle = 70, hjust = 1), 
         plot.title = element_text(hjust = 0.5))
 
-# ♠ Se lo teniamo (ma non penso proprio), aggiungere le linee verticali
+CancerCount = trunc_df2 %>%
+  group_by(primary_disease) %>%
+  summarise(count=n())
+kable(CancerCount)
 
+# ggplot(CancerCount, aes(x = primary_disease, y = count, color = primary_disease)) +
+#   geom_point(lwd = 3) +
+#   ggtitle("Number of cancer types") +
+#   labs(x = "Type of cancer", y = "How many obs") +
+#   theme(axis.text.x = element_text(angle = 70, hjust = 1), 
+#         plot.title = element_text(hjust = 0.5))
