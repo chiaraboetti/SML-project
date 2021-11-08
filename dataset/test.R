@@ -1,5 +1,6 @@
 library(stringi)
 library(ggplot2)
+library(dplyr)
 #####################################################
 
 df1 = read.csv("CRISPR_gene_dependency.csv")
@@ -69,17 +70,14 @@ cat("n. diseases =", length(unique(df2$lineage)),
 
 # ♫ # Counts obs wrt primary disease
 trunc_df2 = df2[1:1032,]
-type = unique(trunc_df2$primary_disease)
 
-num = rep(0, length(type))
-for (i in 1:length(type)){
-  num[i] = length(which(trunc_df2$primary_disease == type[i]))
-}
+CancerCount = trunc_df2 %>%
+  group_by(primary_disease) %>%
+  summarise(count=n())
 
-CancerCount = data.frame(cbind(type, num))
-CancerCount$num = as.numeric(CancerCount$num)
+CancerCount = data.frame(CancerCount)
 
-ggplot(CancerCount, aes(x = type, y = num, color = type)) +
+ggplot(CancerCount, aes(x = primary_disease, y = count, color = primary_disease)) +
   geom_point(lwd = 3) +
   ggtitle("Number of cancer types") +
   labs(x = "Type of cancer", y = "How many obs") +
@@ -87,3 +85,4 @@ ggplot(CancerCount, aes(x = type, y = num, color = type)) +
         plot.title = element_text(hjust = 0.5))
 
 # ♠ Se lo teniamo (ma non penso proprio), aggiungere le linee verticali
+
