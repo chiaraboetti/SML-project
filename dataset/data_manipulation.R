@@ -7,7 +7,6 @@ library(knitr)
 df1 = read.csv("CRISPR_gene_dependency.csv")
 rownames(df1) = df1$DepMap_ID
 
-
 df2 = read.csv("sample_info.csv")
 rownames(df2) = df2$DepMap_ID
 
@@ -15,11 +14,8 @@ rownames(df2) = df2$DepMap_ID
 prod(rownames(df1) %in% rownames(df2))
 
 
-# ♠ RMK: lines from 17 up to 64 deal with the whole df2, so that we have a
-# ♠      general overview
-
 ############################################################
-# ♫ # (de-)Capitalize columns in df2
+# ♫ # (de-)Capitalize columns in df2 and filter it
 ############################################################
 
 unique(df2$primary_disease)
@@ -32,50 +28,55 @@ df2$sample_collection_site = chartr(old = "_", new = " ",
 df2$sample_collection_site = stri_trans_totitle(df2$sample_collection_site)
 unique(df2$sample_collection_site)
 
-############################################################
-# ♫ # Looking for weird obs labels
-############################################################
-
-length(which(df2$primary_disease == "Unknown"))
-which(df2$primary_disease == "Unknown") # obs >1032 --> not in df1
-
-length(which(df2$primary_disease == ""))
-which(df2$primary_disease == "") # obs > 1032 --> not in df1
-
-length(which(df2$primary_disease == "Non-Cancerous"))
-which(df2$primary_disease == "Non-Cancerous") # obs >1032 --> not in df1
-
-length(which(df2$primary_disease == "Immortalized"))
-which(df2$primary_disease == "Immortalized") # obs >1032 --> not in df1
-
-length(which(df2$primary_disease == "Engineered"))
-which(df2$primary_disease == "Engineered") # 5 obs are in df1
-df2$sample_collection_site[c(49, 64, 170, 494, 641)]
-# just 5 and each from different site --> ok to delete
-
-
-# RMK: also lineage can be used as Cancer type classifications, but seems 
-#      more complicated (since more details)
-# --> idea: use it as double check for engineered:
+unique(df2$lineage)
 df2$lineage = chartr(old = "_", new = " ", df2$lineage)
 df2$lineage = stri_trans_totitle(df2$lineage)
 unique(df2$lineage)
-# More obs than primary_disease: just with a quick look, we see engineered
-# is divided in about 10 other categories 
-which(startsWith(df2$lineage, "Engineered"))
-# Same 5 initial obs as before --> ok!
-which(startsWith(df2$lineage, "Engineered")) %in% which(df2$primary_disease == "Engineered")
-# only last obs do not corresponds to primary disease
-# CONLUSION: it is ok to delete those engineered obs (if it is the case)
+
+trunc_df2 = df2[rownames(df1), ]
+
+
+############################################################
+# ♫ # Looking for weird obs labels
+############################################################
+which(trunc_df2$primary_disease == "Unknown")
+which(trunc_df2$primary_disease == "")
+which(trunc_df2$primary_disease == "Non-Cancerous")
+# --> c(986, 996)
+which(trunc_df2$primary_disease == "Immortalized")
+which(trunc_df2$primary_disease == "Engineered")
+# --> c(715, 1024, 1025, 1026, 1027, 1028)
+
+# Investigating more about "Non-Cancerous" and "Engineered"
+# Since also lineage can be used as Cancer type classifications,
+# we can use it as double check:
+trunc_df2 %>%
+  filter(primary_disease %in% c("Non-Cancerous","Engineered")) %>% 
+  select(primary_disease, Subtype, sample_collection_site,
+         lineage, lineage_subtype) %>%
+  kable()
+# All these obs comes from Engineered lineage and have no indication
+# about the subtype disease and the subtype lineage.
+# This makes sense as engineered cells have been synthetically modified.
+# Thus, two ways to proceed:
+# AUT delete 8 obs out to 1032,
+# AUT keep them all, but putting them into the classes wtr the sample
+# collection site.
+
+# CHIARA: secondo me possiamo toglierle, perché effettivamente non sappiamo
+#         a quale disease sono legate. Secondo voi?
+
 
 ############################################################
 # ♫ # Comparison btw primary_disease and sample_collection_site
 ############################################################
 
-cat("n. diseases =", length(unique(df2$primary_disease)), 
-    "VS. n. sites =", length(unique(df2$sample_collection_site)))
+cat("n. diseases =", length(unique(trunc_df2$primary_disease)), 
+    "VS. n. sites =", length(unique(trunc_df2$sample_collection_site)))
+# more sites then disease: let us investigate more and see if there is 
+# an evident substructure
 
-CancerSiteCount = df2[rownames(df1), ] %>%
+CancerSiteCount = trunc_df2 %>%
   select(DepMap_ID, primary_disease, sample_collection_site) %>%
   rename(disease = primary_disease,
          site = sample_collection_site)
@@ -94,11 +95,11 @@ ggplot(CancerSiteCount, aes(x = disease)) +
         plot.title = element_text(hjust = 0.5))
 # CONCLUSION: just stick to the primary_disease for clusters 
 
+
 ############################################################
 # ♫ # Count obs wrt primary disease
 ############################################################
-
-trunc_df2 = df2[rownames(df1),]
+trunc_df2 = df2[rownames(df1), ]
 ggplot(trunc_df2, aes(x = primary_disease)) +
   geom_histogram(aes(fill = primary_disease), stat = "count") +
   ggtitle("Number of cancer types") +
@@ -111,13 +112,18 @@ CancerCount = trunc_df2 %>%
   summarise(count = n())
 kable(CancerCount)
 
+# double check:
+df2 %>%
+  filter(DepMap_ID %in% df1$DepMap_ID, primary_disease == "Lung Cancer") %>%
+  dim()
+# same
+
 
 ############################################################
 # ♫ # Lung cancer VS. All
 ############################################################
 
-# Add a column containing whether the obs is a Lung cancer or not
-df2$primary_disease = stri_trans_totitle(df2$primary_disease)
+# Adding a column containing whether the obs is a Lung cancer or not
 df2 = df2 %>%
   mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
 
@@ -133,12 +139,33 @@ training = sample(1:1032, size = n.train, replace = FALSE)
 lung.training = lung_dataset[training, ]  
 lung.test = lung_dataset[-training, ]
 
+# RMK: Lung cancer is the 12.3% of the total obs --> ? minority class ?
+
 # write.csv(lung.training,"~/Documents/sds/sml/SML-project/dataset/lung_training.csv", 
 #          row.names = TRUE)
 # write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/lung_test.csv", 
 #          row.names = TRUE)
 
+#####
+# ♫ # Without weird obs:
+#####
+
+weird_obs = c(which(trunc_df2$primary_disease == "Non-Cancerous"), 
+              which(trunc_df2$primary_disease == "Engineered"))
+# trunc_df2_bis = trunc_df2[-weird_obs, ]
+df1_bis = df1[-weird_obs, ]
+rownames(df1_bis) = df1_bis$DepMap_ID
+
+# Lung cancer VS. Al
+label_bis = df2[rownames(df1_bis),]$isLung
+lung_dataset_bis = cbind(df1_bis, label_bis)
+
+set.seed(8675309)
+training_bis = sample(1:1024, size = floor(.80*1024), replace = FALSE)
+lung_bis.training = lung_dataset_bis[training_bis, ]  
+lung_bis.test = lung_dataset_bis[-training_bis, ]
+
+
 ############################################################
 # ♫ # 3/4 classes processing
 ############################################################
-
