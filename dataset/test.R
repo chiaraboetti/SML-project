@@ -94,12 +94,22 @@ ggplot(trunc_df2, aes(x = primary_disease)) +
 
 CancerCount = trunc_df2 %>%
   group_by(primary_disease) %>%
-  summarise(count=n())
+  summarise(count = n())
 kable(CancerCount)
 
-# ggplot(CancerCount, aes(x = primary_disease, y = count, color = primary_disease)) +
-#   geom_point(lwd = 3) +
-#   ggtitle("Number of cancer types") +
-#   labs(x = "Type of cancer", y = "How many obs") +
-#   theme(axis.text.x = element_text(angle = 70, hjust = 1), 
-#         plot.title = element_text(hjust = 0.5))
+
+###### Update 08/11/2021
+# ♫ # Lung cancer VS. All
+
+# Add a column containing whether the obs is a Lung cancer or not
+df2$primary_disease = stri_trans_totitle(df2$primary_disease)
+lung_df2 = df2[1:1032, ] %>%
+  mutate(isLung = (primary_disease == "Lung Cancer"))
+
+# and split the data into training and test 
+set.seed(8675309)
+n.train = floor(.80*1032)
+training = sample(1:1032, size = n.train, replace = FALSE)
+
+lung.training = lung_df2[training, ]  
+lung.test = lung_df2[-training, ]
