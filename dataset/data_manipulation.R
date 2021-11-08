@@ -5,32 +5,42 @@ library(knitr)
 #####################################################
 
 df1 = read.csv("CRISPR_gene_dependency.csv")
-df2 = read.csv("sample_info.csv")
+rownames(df1) = df1$DepMap_ID
 
-df1$DepMap_ID %in% df2$DepMap_ID
-length(which(df1$DepMap_ID %in% df2$DepMap_ID)) # as the n of df1
+
+df2 = read.csv("sample_info.csv")
+rownames(df2) = df2$DepMap_ID
+
+# checking if label of df1 are all contained in df2
+prod(rownames(df1) %in% rownames(df2))
+
 
 # ♠ RMK: lines from 17 up to 64 deal with the whole df2, so that we have a
 # ♠      general overview
 
+############################################################
+# ♫ # (de-)Capitalize columns in df2
+############################################################
 
-# ♫ # (de-)Capitalize columns
 unique(df2$primary_disease)
 df2$primary_disease = stri_trans_totitle(df2$primary_disease)
 unique(df2$primary_disease)
 
 unique(df2$sample_collection_site)
-df2$sample_collection_site = chartr(old = "_", new = " ", df2$sample_collection_site)
+df2$sample_collection_site = chartr(old = "_", new = " ", 
+                                    df2$sample_collection_site)
 df2$sample_collection_site = stri_trans_totitle(df2$sample_collection_site)
 unique(df2$sample_collection_site)
 
-
+############################################################
 # ♫ # Looking for weird obs labels
+############################################################
+
 length(which(df2$primary_disease == "Unknown"))
 which(df2$primary_disease == "Unknown") # obs >1032 --> not in df1
 
 length(which(df2$primary_disease == ""))
-which(df2$primary_disease == "") # obs >1032 --> not in df1
+which(df2$primary_disease == "") # obs > 1032 --> not in df1
 
 length(which(df2$primary_disease == "Non-Cancerous"))
 which(df2$primary_disease == "Non-Cancerous") # obs >1032 --> not in df1
@@ -58,12 +68,14 @@ which(startsWith(df2$lineage, "Engineered")) %in% which(df2$primary_disease == "
 # only last obs do not corresponds to primary disease
 # CONLUSION: it is ok to delete those engineered obs (if it is the case)
 
-
+############################################################
 # ♫ # Comparison btw primary_disease and sample_collection_site
+############################################################
+
 cat("n. diseases =", length(unique(df2$primary_disease)), 
     "VS. n. sites =", length(unique(df2$sample_collection_site)))
 
-CancerSiteCount = df2[1:1032, ] %>%
+CancerSiteCount = df2[rownames(df1), ] %>%
   select(DepMap_ID, primary_disease, sample_collection_site) %>%
   rename(disease = primary_disease,
          site = sample_collection_site)
@@ -82,9 +94,11 @@ ggplot(CancerSiteCount, aes(x = disease)) +
         plot.title = element_text(hjust = 0.5))
 # CONCLUSION: just stick to the primary_disease for clusters 
 
-
+############################################################
 # ♫ # Count obs wrt primary disease
-trunc_df2 = df2[1:1032,]
+############################################################
+
+trunc_df2 = df2[rownames(df1),]
 ggplot(trunc_df2, aes(x = primary_disease)) +
   geom_histogram(aes(fill = primary_disease), stat = "count") +
   ggtitle("Number of cancer types") +
@@ -98,18 +112,33 @@ CancerCount = trunc_df2 %>%
 kable(CancerCount)
 
 
-###### Update 08/11/2021
+############################################################
 # ♫ # Lung cancer VS. All
+############################################################
 
 # Add a column containing whether the obs is a Lung cancer or not
 df2$primary_disease = stri_trans_totitle(df2$primary_disease)
-lung_df2 = df2[1:1032, ] %>%
-  mutate(isLung = (primary_disease == "Lung Cancer"))
+df2 = df2 %>%
+  mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
+
+# appending this column to the CRISP dataset to have labeled data
+label = df2[rownames(df1),]$isLung
+lung_dataset = cbind(df1, label)
 
 # and split the data into training and test 
 set.seed(8675309)
 n.train = floor(.80*1032)
 training = sample(1:1032, size = n.train, replace = FALSE)
 
-lung.training = lung_df2[training, ]  
-lung.test = lung_df2[-training, ]
+lung.training = lung_dataset[training, ]  
+lung.test = lung_dataset[-training, ]
+
+# write.csv(lung.training,"~/Documents/sds/sml/SML-project/dataset/lung_training.csv", 
+#          row.names = TRUE)
+# write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/lung_test.csv", 
+#          row.names = TRUE)
+
+############################################################
+# ♫ # 3/4 classes processing
+############################################################
+
