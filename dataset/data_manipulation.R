@@ -5,10 +5,7 @@ library(knitr)
 #####################################################
 
 df1 = read.csv("CRISPR_gene_dependency.csv")
-rownames(df1) = df1$DepMap_ID
-
 df2 = read.csv("sample_info.csv")
-rownames(df2) = df2$DepMap_ID
 
 # checking if label of df1 are all contained in df2
 prod(rownames(df1) %in% rownames(df2))
@@ -33,8 +30,8 @@ df2$lineage = chartr(old = "_", new = " ", df2$lineage)
 df2$lineage = stri_trans_totitle(df2$lineage)
 unique(df2$lineage)
 
-trunc_df2 = df2[rownames(df1), ]
-
+trunc_df2 = df2 %>%
+  filter(DepMap_ID %in% df1$DepMap_ID)
 
 ############################################################
 # ♫ # Looking for weird obs labels
@@ -99,7 +96,9 @@ ggplot(CancerSiteCount, aes(x = disease)) +
 ############################################################
 # ♫ # Count obs wrt primary disease
 ############################################################
-trunc_df2 = df2[rownames(df1), ]
+trunc_df2 = df2 %>%
+  filter(DepMap_ID %in% df1$DepMap_ID)
+
 ggplot(trunc_df2, aes(x = primary_disease)) +
   geom_histogram(aes(fill = primary_disease), stat = "count") +
   ggtitle("Number of cancer types") +
@@ -112,10 +111,41 @@ CancerCount = trunc_df2 %>%
   summarise(count = n())
 kable(CancerCount)
 
+# ♫ # Gastroinstestinal cancers VS. All the others
+trunc_df2 = df2 %>%
+  filter(DepMap_ID %in% df1$DepMap_ID)
+
+trunc_df2 = trunc_df2 %>%
+  mutate(isGastro = case_when (
+    primary_disease ==  "Bile Duct Cancer" ~ 1,
+    primary_disease == "Kidney Cancer"~ 1,
+    primary_disease == "Gastric Cancer"~ 1,
+    primary_disease == "Gallbladder Cancer"~ 1,
+    primary_disease == "Esophageal Cancer"~ 1,
+    primary_disease == "Colon/Colorectal Cancer"~ 1,
+    primary_disease == "Liver Cancer"~ 1,
+    TRUE~ 0 
+  ))
+
+# appending this column to the CRISP dataset to have labeled data
+label = trunc_df2$isGastro
+gastro_dataset = cbind(df1, label)
+
+# and split the data into training and test 
+set.seed(8675309)
+n.train = floor(.80*1032)
+training = sample(1:1032, size = n.train, replace = FALSE)
+
+gastro.training = gastro_dataset[training, ]  
+gastro.test = gastro_dataset[-training, ]
+
+set.seed(8675309)
+
+
 # double check:
-df2 %>%
-  filter(DepMap_ID %in% df1$DepMap_ID, primary_disease == "Lung Cancer") %>%
-  dim()
+#df2 %>%
+#  filter(DepMap_ID %in% df1$DepMap_ID, primary_disease == "Lung Cancer") %>%
+#  dim()
 # same
 
 
@@ -124,20 +154,20 @@ df2 %>%
 ############################################################
 
 # Adding a column containing whether the obs is a Lung cancer or not
-df2 = df2 %>%
-  mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
+#df2 = df2 %>%
+ # mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
 
 # appending this column to the CRISP dataset to have labeled data
-label = df2[rownames(df1),]$isLung
-lung_dataset = cbind(df1, label)
+#label = df2[rownames(df1),]$isLung
+#lung_dataset = cbind(df1, label)
 
 # and split the data into training and test 
-set.seed(8675309)
-n.train = floor(.80*1032)
-training = sample(1:1032, size = n.train, replace = FALSE)
+#set.seed(8675309)
+#n.train = floor(.80*1032)
+#training = sample(1:1032, size = n.train, replace = FALSE)
 
-lung.training = lung_dataset[training, ]  
-lung.test = lung_dataset[-training, ]
+#lung.training = lung_dataset[training, ]  
+#lung.test = lung_dataset[-training, ]
 
 # RMK: Lung cancer is the 12.3% of the total obs --> ? minority class ?
 
@@ -157,13 +187,13 @@ df1_bis = df1[-weird_obs, ]
 rownames(df1_bis) = df1_bis$DepMap_ID
 
 # Lung cancer VS. Al
-label_bis = df2[rownames(df1_bis),]$isLung
-lung_dataset_bis = cbind(df1_bis, label_bis)
+#label_bis = df2[rownames(df1_bis),]$isLung
+#lung_dataset_bis = cbind(df1_bis, label_bis)
 
-set.seed(8675309)
-training_bis = sample(1:1024, size = floor(.80*1024), replace = FALSE)
-lung_bis.training = lung_dataset_bis[training_bis, ]  
-lung_bis.test = lung_dataset_bis[-training_bis, ]
+#set.seed(8675309)
+#training_bis = sample(1:1024, size = floor(.80*1024), replace = FALSE)
+#lung_bis.training = lung_dataset_bis[training_bis, ]  
+#lung_bis.test = lung_dataset_bis[-training_bis, ]
 
 
 ############################################################
