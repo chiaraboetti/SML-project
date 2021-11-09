@@ -1,2 +1,3 @@
 .DS_Store
 dataset/CRISPR_gene_dependency.csv
+.Rhistory
