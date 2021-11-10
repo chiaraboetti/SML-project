@@ -2,6 +2,7 @@ library(stringi)
 library(ggplot2)
 library(dplyr)
 library(knitr)
+`%notin%` <- Negate(`%in%`)
 #####################################################
 
 df1 = read.csv("CRISPR_gene_dependency.csv")
@@ -60,9 +61,76 @@ trunc_df2 %>%
 # AUT keep them all, but putting them into the classes wtr the sample
 # collection site.
 
-# CHIARA: secondo me possiamo toglierle, perché effettivamente non sappiamo
-#         a quale disease sono legate. Secondo voi?
+############################################################
+# ♫ # Checking for NAs
+############################################################
+nas = data.frame(which(is.na(df1), arr.ind = TRUE))
+nas = nas[order(nas$row), ]
+nas = cbind(df1$DepMap_ID[nas$row], nas)
+colnames(nas) = c("DepMap_ID", "row", "col") 
 
+ggplot(nas, aes(x = row)) +
+  geom_bar(stat = "count") +
+  ggtitle("How many NA per row")
+
+trunc_df2 %>%
+  filter(DepMap_ID %in% row_na) %>%
+  select(DepMap_ID, primary_disease, sample_collection_site, lineage) %>%
+  kable()
+# Nothing particular, obs seem unrelated 
+
+NaCount = nas %>%
+  group_by(row) %>%
+  summarise(count = n())
+NaCount = cbind(df1$DepMap_ID[unique(nas$row)], NaCount)
+colnames(NaCount) = c("DepMap_ID", "Row_index", "Count")
+kable(NaCount)
+
+NaCount[NaCount$Count > 1000, ]$Row_index # to be deleted
+
+new_df1 = df1 %>%
+  filter(DepMap_ID %notin% NaCount[NaCount$Count > 1000, ]$DepMap_ID)
+
+# ggplot(data.frame(which(is.na(new_df1), arr.ind = TRUE)), 
+#        aes(x = row)) +
+#   geom_bar(stat = "count") +
+#   ggtitle("How many NA per row")
+
+# And let us replace NA with 0
+new_df1[is.na(new_df1)] = 0
+
+
+## check of row sum
+sum(new_df1[1, -1])
+sum(new_df1[1000, -1])
+sum(new_df1[504, -1])
+sum(new_df1[750, -1])
+sum(new_df1[9, -1]) #
+sum(new_df1[379, -1]) #
+sum(new_df1[417, -1]) #
+sum(new_df1[548, -1]) #
+sum(new_df1[582, -1]) #
+
+
+# check of col sum
+sum(new_df1[, 2])
+sum(new_df1[, 121])
+sum(new_df1[, 16897])
+sum(new_df1[, 5598])
+sum(new_df1[, 489])
+sum(new_df1[, 4970])
+sum(new_df1[, 24])
+sum(new_df1[, 697])
+
+
+# more_than_one = select_if(new_df1, ~any(. > 1.01))
+
+x = seq(0, 1027)
+for (i in 1:1027) {
+  x[i] = length(which(new_df1[i, -1] > 1.0))
+}
+sum(x) # 1027
+x[1028] # = 1027
 
 ############################################################
 # ♫ # Comparison btw primary_disease and sample_collection_site
@@ -155,7 +223,7 @@ set.seed(8675309)
 
 # Adding a column containing whether the obs is a Lung cancer or not
 #df2 = df2 %>%
- # mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
+# mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
 
 # appending this column to the CRISP dataset to have labeled data
 #label = df2[rownames(df1),]$isLung
