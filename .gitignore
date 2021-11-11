@@ -1,3 +1,7 @@
 .DS_Store
 dataset/CRISPR_gene_dependency.csv
 .Rhistory
+dataset/gastro_test.csv
+dataset/lung_training.csv
+dataset/lung_test.csv
+dataset/gastro_training.csv
