@@ -63,6 +63,7 @@ trunc_df2 %>%
 # AUT keep them all, but putting them into the classes wtr the sample
 # collection site.
 
+
 ############################################################
 # ♫ # Checking for NAs
 ############################################################
@@ -71,16 +72,14 @@ nas = nas[order(nas$row), ]
 nas = cbind(df1$DepMap_ID[nas$row], nas)
 colnames(nas) = c("DepMap_ID", "row", "col") 
 
-ggplot(nas, aes(x = row)) +
-  geom_bar(stat = "count") +
-  ggtitle("How many NA per row")
+ggplot(nas, aes(x = DepMap_ID)) +
+  geom_bar(aes(fill = DepMap_ID), stat = "count") +
+  ggtitle("How many NA per row") +
+  labs(x = "Cell DepMap IDs", y = "How many obs") +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1), 
+        plot.title = element_text(hjust = 0.5))
 
-trunc_df2 %>%
-  filter(DepMap_ID %in% nas) %>%
-  select(DepMap_ID, primary_disease, sample_collection_site, lineage) %>%
-  kable()
-# Nothing particular, obs seem unrelated 
-
+# Let us see how many missing values per cell
 NaCount = nas %>%
   group_by(row) %>%
   summarise(count = n())
@@ -88,10 +87,26 @@ NaCount = cbind(df1$DepMap_ID[unique(nas$row)], NaCount)
 colnames(NaCount) = c("DepMap_ID", "Row_index", "Count")
 kable(NaCount)
 
-# Since there are only ten obs which have NA values, we decide to revome them all:
+trunc_df2 %>%
+  filter(DepMap_ID %in% nas$DepMap_ID) %>%
+  select(DepMap_ID, primary_disease, sample_collection_site, lineage) %>%
+  kable()
+# Nothing particular, obs seem unrelated
 
+# Since there are only ten obs which have NA values, we decide 
+#to remove them all:
 df1 = df1 %>%
   filter(DepMap_ID %notin% NaCount$DepMap_ID)
+trunc_df2 = trunc_df2 %>%
+  filter(DepMap_ID %notin% NaCount$DepMap_ID)
+
+# NaCount[NaCount$Count > 1000, ]$Row_index # to be deleted
+# 
+# new_df1 = df1 %>%
+#   filter(DepMap_ID %notin% NaCount[NaCount$Count > 1000, ]$DepMap_ID)
+# 
+# # And let us replace NA with 0
+# new_df1[is.na(new_df1)] = 0
 
 
 ############################################################
@@ -101,13 +116,14 @@ df1 = df1 %>%
 ## check if entries are in [0, 1]: ok!
 prod((df1 %>% select(-DepMap_ID)) >= 0 & (df1 %>% select(-DepMap_ID)) <= 1)
 
-
 ## check of row sum
 row.sum = rowSums(df1 %>% select(-DepMap_ID))
 
-# We observe that the sum of the rows does not sum to 1. That is not a problem
-# despite dealing with probabilities: in fact, the effect of a given gene on a 
-# certain cancer does not exclude the effect of another gene on it.
+# We observe that the sum of the rows does not sum to 1. 
+# That is not a problem despite dealing with probabilities: 
+# in fact, the effect of a given gene on a certain cancer 
+# does not exclude the effect of another gene on it.
+
 
 ############################################################
 # ♫ # Comparison btw primary_disease and sample_collection_site
@@ -115,8 +131,8 @@ row.sum = rowSums(df1 %>% select(-DepMap_ID))
 
 cat("n. diseases =", length(unique(trunc_df2$primary_disease)), 
     "VS. n. sites =", length(unique(trunc_df2$sample_collection_site)))
-# more sites then disease: let us investigate more and see if there is 
-# an evident substructure
+# more sites then disease: let us investigate more and 
+# see if there is an evident substructure
 
 CancerSiteCount = trunc_df2 %>%
   select(DepMap_ID, primary_disease, sample_collection_site) %>%
@@ -127,7 +143,8 @@ CancerSiteCount %>%
   group_by(disease, site) %>% 
   summarise(count = n()) %>%
   kable()
-# Stranger things: probably it is not a good idea looking at the sample site for the clusters
+# Stranger things: probably it is not a good idea looking at the
+# sample sites for the clusters
 
 ggplot(CancerSiteCount, aes(x = disease)) +
   geom_histogram(aes(fill = site), stat = "count") +
@@ -135,7 +152,7 @@ ggplot(CancerSiteCount, aes(x = disease)) +
   labs(x = "Type of cancer", y = "How many obs") +
   theme(axis.text.x = element_text(angle = 70, hjust = 1), 
         plot.title = element_text(hjust = 0.5))
-# CONCLUSION: just stick to the primary_disease for clusters 
+# Conclusion: just stick to the primary_disease for clusters 
 
 
 ############################################################
@@ -156,26 +173,29 @@ CancerCount = trunc_df2 %>%
   summarise(count = n())
 kable(CancerCount)
 
+
 ############################################################
 # ♫ # Obtain a dataset for binary classification 
 ############################################################
 
-# We decide to try two binary classification problem:
+# We decide to try two binary classification problems:
 # - gastrointestinal vs all: this class has the highest number 
 #                            of obs but heterogeneous
 # - lung vs all: fewer number of obs but homogeneous
 
 ############################################################
-# Gastroinstestinal cancers VS. All the others
+# Gastrointestinal cancers VS. All the others
+# We decide which are the labels related to Gastrointestinal
+# cancers according to [https://www.cancer.gov/types/by-body-location]
 
 trunc_df2 = trunc_df2 %>%
   mutate(isGastro = case_when (
     primary_disease ==  "Bile Duct Cancer" ~ 1,
-    primary_disease == "Kidney Cancer"~ 1,
-    primary_disease == "Gastric Cancer"~ 1,
-    primary_disease == "Gallbladder Cancer"~ 1,
-    primary_disease == "Esophageal Cancer"~ 1,
-    primary_disease == "Colon/Colorectal Cancer"~ 1,
+    primary_disease == "Kidney Cancer" ~ 1,
+    primary_disease == "Gastric Cancer" ~ 1,
+    primary_disease == "Gallbladder Cancer" ~ 1,
+    primary_disease == "Esophageal Cancer" ~ 1,
+    primary_disease == "Colon/Colorectal Cancer" ~ 1,
     primary_disease == "Liver Cancer"~ 1,
     TRUE ~ 0 
   ))
@@ -184,10 +204,10 @@ trunc_df2 = trunc_df2 %>%
 label = trunc_df2$isGastro
 gastro_dataset = cbind(df1, label)
 
-# and split the data into training and test 
+# and splitting the data into training and test 
 set.seed(8675309)
-n.train = floor(.80*1032)
-training = sample(1:1032, size = n.train, replace = FALSE)
+n.train = floor(.80*dim(df1)[1])
+training = sample(1:dim(df1)[1], size = n.train, replace = FALSE)
 
 gastro.training = gastro_dataset[training, ]  
 gastro.test = gastro_dataset[-training, ]
@@ -195,38 +215,42 @@ gastro.test = gastro_dataset[-training, ]
 # producing csv file of training and test
 write.csv(gastro.training,"~/Documents/sds/sml/SML-project/dataset/gastro_training.csv", 
           row.names = F)
- write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/gastro_test.csv", 
+write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/gastro_test.csv", 
           gastro.names = F)
 
+# and removing this additional column to come back to the original
+trunc_df2 = trunc_df2 %>%
+  subset(select = -isGastro)
 
 ############################################################
 # ♫ # Lung cancer VS. All
 
- trunc_df2 = trunc_df2 %>%
-   mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
- 
- # appending this column to the CRISP dataset to have labeled data
- label = trunc_df2$isLung
- lung_dataset = cbind(df1, label)
- 
- # and split the data into training and test 
- set.seed(8675309)
- n.train = floor(.80*1032)
- training = sample(1:1032, size = n.train, replace = FALSE)
- 
- lung.training = lung_dataset[training, ]  
- lung.test = lung_dataset[-training, ]
- 
- # producing csv file of training and test
- write.csv(lung.training,"~/Documents/sds/sml/SML-project/dataset/lung_training.csv", 
-           row.names = F)
- write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/lung_test.csv", 
-           row.names = F)
+trunc_df2 = trunc_df2 %>%
+  mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
+
+# appending this column to the CRISP dataset to have labeled data
+label = trunc_df2$isLung
+lung_dataset = cbind(df1, label)
+
+# and splitting the data into training and test 
+set.seed(8675309)
+n.train = floor(.80*dim(df1)[1])
+training = sample(1:dim(df1)[1], size = n.train, replace = FALSE)
+
+lung.training = lung_dataset[training, ]  
+lung.test = lung_dataset[-training, ]
+
+# producing csv file of training and test
+write.csv(lung.training,"~/Documents/sds/sml/SML-project/dataset/lung_training.csv", 
+          row.names = F)
+write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/lung_test.csv", 
+          row.names = F)
+
+# and removing this additional column to come back to the original
+trunc_df2 = trunc_df2 %>%
+  subset(select = -isLung)
 
 
 ############################################################
 # ♫ # Obtain dataset for 3/4 classes classification
 ############################################################
-
-
-
