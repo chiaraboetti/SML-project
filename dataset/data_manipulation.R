@@ -218,9 +218,6 @@ write.csv(gastro.training,"~/Documents/sds/sml/SML-project/dataset/gastro_traini
 write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/gastro_test.csv", 
           gastro.names = F)
 
-# and removing this additional column to come back to the original
-trunc_df2 = trunc_df2 %>%
-  subset(select = -isGastro)
 
 ############################################################
 # ♫ # Lung cancer VS. All
@@ -245,10 +242,6 @@ write.csv(lung.training,"~/Documents/sds/sml/SML-project/dataset/lung_training.c
           row.names = F)
 write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/lung_test.csv", 
           row.names = F)
-
-# and removing this additional column to come back to the original
-trunc_df2 = trunc_df2 %>%
-  subset(select = -isLung)
 
 
 ############################################################
