@@ -48,11 +48,13 @@ which(trunc_df2$primary_disease == "Engineered")
 # Investigating more about "Non-Cancerous" and "Engineered"
 # Since also lineage can be used as Cancer type classifications,
 # we can use it as double check:
+
 trunc_df2 %>%
   filter(primary_disease %in% c("Non-Cancerous","Engineered")) %>% 
   select(primary_disease, Subtype, sample_collection_site,
          lineage, lineage_subtype) %>%
   kable()
+
 # All these obs comes from Engineered lineage and have no indication
 # about the subtype disease and the subtype lineage.
 # This makes sense as engineered cells have been synthetically modified.
@@ -74,7 +76,7 @@ ggplot(nas, aes(x = row)) +
   ggtitle("How many NA per row")
 
 trunc_df2 %>%
-  filter(DepMap_ID %in% row_na) %>%
+  filter(DepMap_ID %in% nas) %>%
   select(DepMap_ID, primary_disease, sample_collection_site, lineage) %>%
   kable()
 # Nothing particular, obs seem unrelated 
@@ -86,51 +88,26 @@ NaCount = cbind(df1$DepMap_ID[unique(nas$row)], NaCount)
 colnames(NaCount) = c("DepMap_ID", "Row_index", "Count")
 kable(NaCount)
 
-NaCount[NaCount$Count > 1000, ]$Row_index # to be deleted
+# Since there are only ten obs which have NA values, we decide to revome them all:
 
-new_df1 = df1 %>%
-  filter(DepMap_ID %notin% NaCount[NaCount$Count > 1000, ]$DepMap_ID)
+df1 = df1 %>%
+  filter(DepMap_ID %notin% NaCount$DepMap_ID)
 
-# ggplot(data.frame(which(is.na(new_df1), arr.ind = TRUE)), 
-#        aes(x = row)) +
-#   geom_bar(stat = "count") +
-#   ggtitle("How many NA per row")
 
-# And let us replace NA with 0
-new_df1[is.na(new_df1)] = 0
+############################################################
+# ♫ # Check if df1 is a data.frame of probabilities
+############################################################
+
+## check if entries are in [0, 1]: ok!
+prod((df1 %>% select(-DepMap_ID)) >= 0 & (df1 %>% select(-DepMap_ID)) <= 1)
 
 
 ## check of row sum
-sum(new_df1[1, -1])
-sum(new_df1[1000, -1])
-sum(new_df1[504, -1])
-sum(new_df1[750, -1])
-sum(new_df1[9, -1]) #
-sum(new_df1[379, -1]) #
-sum(new_df1[417, -1]) #
-sum(new_df1[548, -1]) #
-sum(new_df1[582, -1]) #
+row.sum = rowSums(df1 %>% select(-DepMap_ID))
 
-
-# check of col sum
-sum(new_df1[, 2])
-sum(new_df1[, 121])
-sum(new_df1[, 16897])
-sum(new_df1[, 5598])
-sum(new_df1[, 489])
-sum(new_df1[, 4970])
-sum(new_df1[, 24])
-sum(new_df1[, 697])
-
-
-# more_than_one = select_if(new_df1, ~any(. > 1.01))
-
-x = seq(0, 1027)
-for (i in 1:1027) {
-  x[i] = length(which(new_df1[i, -1] > 1.0))
-}
-sum(x) # 1027
-x[1028] # = 1027
+# We observe that the sum of the rows does not sum to 1. That is not a problem
+# despite dealing with probabilities: in fact, the effect of a given gene on a 
+# certain cancer does not exclude the effect of another gene on it.
 
 ############################################################
 # ♫ # Comparison btw primary_disease and sample_collection_site
@@ -179,9 +156,17 @@ CancerCount = trunc_df2 %>%
   summarise(count = n())
 kable(CancerCount)
 
-# ♫ # Gastroinstestinal cancers VS. All the others
-trunc_df2 = df2 %>%
-  filter(DepMap_ID %in% df1$DepMap_ID)
+############################################################
+# ♫ # Obtain a dataset for binary classification 
+############################################################
+
+# We decide to try two binary classification problem:
+# - gastrointestinal vs all: this class has the highest number 
+#                            of obs but heterogeneous
+# - lung vs all: fewer number of obs but homogeneous
+
+############################################################
+# Gastroinstestinal cancers VS. All the others
 
 trunc_df2 = trunc_df2 %>%
   mutate(isGastro = case_when (
@@ -192,7 +177,7 @@ trunc_df2 = trunc_df2 %>%
     primary_disease == "Esophageal Cancer"~ 1,
     primary_disease == "Colon/Colorectal Cancer"~ 1,
     primary_disease == "Liver Cancer"~ 1,
-    TRUE~ 0 
+    TRUE ~ 0 
   ))
 
 # appending this column to the CRISP dataset to have labeled data
@@ -207,63 +192,41 @@ training = sample(1:1032, size = n.train, replace = FALSE)
 gastro.training = gastro_dataset[training, ]  
 gastro.test = gastro_dataset[-training, ]
 
-set.seed(8675309)
-
-
-# double check:
-#df2 %>%
-#  filter(DepMap_ID %in% df1$DepMap_ID, primary_disease == "Lung Cancer") %>%
-#  dim()
-# same
+# producing csv file of training and test
+write.csv(gastro.training,"~/Documents/sds/sml/SML-project/dataset/gastro_training.csv", 
+          row.names = F)
+ write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/gastro_test.csv", 
+          gastro.names = F)
 
 
 ############################################################
 # ♫ # Lung cancer VS. All
-############################################################
 
-# Adding a column containing whether the obs is a Lung cancer or not
-#df2 = df2 %>%
-# mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
-
-# appending this column to the CRISP dataset to have labeled data
-#label = df2[rownames(df1),]$isLung
-#lung_dataset = cbind(df1, label)
-
-# and split the data into training and test 
-#set.seed(8675309)
-#n.train = floor(.80*1032)
-#training = sample(1:1032, size = n.train, replace = FALSE)
-
-#lung.training = lung_dataset[training, ]  
-#lung.test = lung_dataset[-training, ]
-
-# RMK: Lung cancer is the 12.3% of the total obs --> ? minority class ?
-
-# write.csv(lung.training,"~/Documents/sds/sml/SML-project/dataset/lung_training.csv", 
-#          row.names = TRUE)
-# write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/lung_test.csv", 
-#          row.names = TRUE)
-
-#####
-# ♫ # Without weird obs:
-#####
-
-weird_obs = c(which(trunc_df2$primary_disease == "Non-Cancerous"), 
-              which(trunc_df2$primary_disease == "Engineered"))
-# trunc_df2_bis = trunc_df2[-weird_obs, ]
-df1_bis = df1[-weird_obs, ]
-rownames(df1_bis) = df1_bis$DepMap_ID
-
-# Lung cancer VS. Al
-#label_bis = df2[rownames(df1_bis),]$isLung
-#lung_dataset_bis = cbind(df1_bis, label_bis)
-
-#set.seed(8675309)
-#training_bis = sample(1:1024, size = floor(.80*1024), replace = FALSE)
-#lung_bis.training = lung_dataset_bis[training_bis, ]  
-#lung_bis.test = lung_dataset_bis[-training_bis, ]
+ trunc_df2 = trunc_df2 %>%
+   mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
+ 
+ # appending this column to the CRISP dataset to have labeled data
+ label = trunc_df2$isLung
+ lung_dataset = cbind(df1, label)
+ 
+ # and split the data into training and test 
+ set.seed(8675309)
+ n.train = floor(.80*1032)
+ training = sample(1:1032, size = n.train, replace = FALSE)
+ 
+ lung.training = lung_dataset[training, ]  
+ lung.test = lung_dataset[-training, ]
+ 
+ # producing csv file of training and test
+ write.csv(lung.training,"~/Documents/sds/sml/SML-project/dataset/lung_training.csv", 
+           row.names = F)
+ write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/lung_test.csv", 
+           row.names = F)
 
 
 ############################################################
-# ♫ # 3/4 classes processing
+# ♫ # Obtain dataset for 3/4 classes classification
 ############################################################
+
+
+
