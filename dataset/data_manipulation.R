@@ -1,4 +1,4 @@
-library(stringi)
+#   library(stringi)
 library(ggplot2)
 library(dplyr)
 library(knitr)
@@ -74,7 +74,7 @@ colnames(nas) = c("DepMap_ID", "row", "col")
 
 ggplot(nas, aes(x = DepMap_ID)) +
   geom_bar(aes(fill = DepMap_ID), stat = "count") +
-  ggtitle("How many NA per row") +
+  ggtitle("How many NA per Cell") +
   labs(x = "Cell DepMap IDs", y = "How many obs") +
   theme(axis.text.x = element_text(angle = 70, hjust = 1), 
         plot.title = element_text(hjust = 0.5))
@@ -99,6 +99,9 @@ df1 = df1 %>%
   filter(DepMap_ID %notin% NaCount$DepMap_ID)
 trunc_df2 = trunc_df2 %>%
   filter(DepMap_ID %notin% NaCount$DepMap_ID)
+
+data.frame(which(is.na(df1), arr.ind = TRUE))
+data.frame(which(is.na(trunc_df2$primary_disease), arr.ind = TRUE))
 
 # NaCount[NaCount$Count > 1000, ]$Row_index # to be deleted
 # 
@@ -158,8 +161,6 @@ ggplot(CancerSiteCount, aes(x = disease)) +
 ############################################################
 # ♫ # Count obs wrt primary disease
 ############################################################
-trunc_df2 = df2 %>%
-  filter(DepMap_ID %in% df1$DepMap_ID)
 
 ggplot(trunc_df2, aes(x = primary_disease)) +
   geom_histogram(aes(fill = primary_disease), stat = "count") +
@@ -173,6 +174,12 @@ CancerCount = trunc_df2 %>%
   summarise(count = n())
 kable(CancerCount)
 
+CancerCount %>%
+  filter(primary_disease %in% c("Bile Duct Cancer", "Kidney Cancer", "Gastric Cancer",
+                                "Gallbladder Cancer", "Esophageal Cancer", 
+                                "Colon/Colorectal Cancer", "Liver Cancer")) %>%
+  select(count) %>%
+  sum()
 
 ############################################################
 # ♫ # Obtain a dataset for binary classification 
@@ -181,7 +188,9 @@ kable(CancerCount)
 # We decide to try two binary classification problems:
 # - gastrointestinal vs all: this class has the highest number 
 #                            of obs but heterogeneous
+#   (205 obs)
 # - lung vs all: fewer number of obs but homogeneous
+#   (126 obs)
 
 ############################################################
 # Gastrointestinal cancers VS. All the others
@@ -213,10 +222,8 @@ gastro.training = gastro_dataset[training, ]
 gastro.test = gastro_dataset[-training, ]
 
 # producing csv file of training and test
-write.csv(gastro.training,"~/Documents/sds/sml/SML-project/dataset/gastro_training.csv", 
-          row.names = F)
-write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/gastro_test.csv", 
-          gastro.names = F)
+# write.csv(gastro.training,"C:/Users/user/Desktop/SML/Project/gastro_training.csv", row.names = F)
+# write.csv(lung.test,"C:/Users/user/Desktop/SML/Project/gastro_test.csv", gastro.names = F)
 
 
 ############################################################
@@ -238,10 +245,8 @@ lung.training = lung_dataset[training, ]
 lung.test = lung_dataset[-training, ]
 
 # producing csv file of training and test
-write.csv(lung.training,"~/Documents/sds/sml/SML-project/dataset/lung_training.csv", 
-          row.names = F)
-write.csv(lung.test,"~/Documents/sds/sml/SML-project/dataset/lung_test.csv", 
-          row.names = F)
+# write.csv(lung.training,"C:/Users/user/Desktop/SML/Project/lung_training.csv", row.names = F)
+# write.csv(lung.test,"C:/Users/user/Desktop/SML/Project/lung_test.csv", row.names = F)
 
 
 ############################################################
