@@ -178,8 +178,8 @@ CancerCount %>%
   filter(primary_disease %in% c("Bile Duct Cancer", "Kidney Cancer", "Gastric Cancer",
                                 "Gallbladder Cancer", "Esophageal Cancer", 
                                 "Colon/Colorectal Cancer", "Liver Cancer")) %>%
-  select(count) %>%
-  sum()
+  sum(select(count))
+
 
 ############################################################
 # ♫ # Obtain a dataset for binary classification 
@@ -223,7 +223,7 @@ gastro.test = gastro_dataset[-training, ]
 
 # producing csv file of training and test
 # write.csv(gastro.training,"C:/Users/user/Desktop/SML/Project/gastro_training.csv", row.names = F)
-# write.csv(lung.test,"C:/Users/user/Desktop/SML/Project/gastro_test.csv", gastro.names = F)
+# write.csv(gastro.test,"C:/Users/user/Desktop/SML/Project/gastro_test.csv", row.names = F)
 
 
 ############################################################
