@@ -1,4 +1,4 @@
-#   library(stringi)
+library(stringi)
 library(ggplot2)
 library(dplyr)
 library(knitr)
