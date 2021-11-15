@@ -2,6 +2,7 @@ library(ggplot2)
 library(scatterplot3d)
 library(dplyr)
 library(knitr)
+library(smotefamily)
 #####################################################
 
 lung.train = read.csv("dataset/lung_training.csv")
@@ -78,3 +79,14 @@ legend("bottomright", legend = c("Lung Cancer", "Other"),
 ############################################################
 # ??? # PCA with adjustment for minority class 
 ############################################################
+
+
+##############################################################
+# Balancing the minority class using the SMOTE function 
+##############################################################
+
+genData = SMOTE(lung.training[,-1],lung.training[,17395], dup_size = 1)
+lung.training_balanced = genData$data #192 positive obs over 917 (about 21%)
+
+
+
