@@ -2,6 +2,7 @@ library(stringi)
 library(ggplot2)
 library(dplyr)
 library(knitr)
+library(smotefamily)
 `%notin%` <- Negate(`%in%`)
 #####################################################
 
@@ -247,6 +248,16 @@ lung.test = lung_dataset[-training, ]
 # producing csv file of training and test
 # write.csv(lung.training,"C:/Users/user/Desktop/SML/Project/lung_training.csv", row.names = F)
 # write.csv(lung.test,"C:/Users/user/Desktop/SML/Project/lung_test.csv", row.names = F)
+
+# balancing the minority class using the SMOTE function 
+length(which(lung.training$label == 1))/nrow(lung.training)
+genData = SMOTE(lung.training[,-1], lung.training$label, dup_size = 1)
+lung.training_balanced = genData$data
+length(which(lung.training_balanced$label == 1))/nrow(lung.training_balanced)
+# 192 positive obs over 917 (about 21%)
+
+# write.csv(lung.training_balanced,"C:/Users/user/Desktop/SML/Project/lung_training_balanced.csv", 
+#           row.names = F)
 
 
 ############################################################
