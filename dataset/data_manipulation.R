@@ -251,12 +251,12 @@ lung.test = lung_dataset[-training, ]
 
 # balancing the minority class using the SMOTE function 
 length(which(lung.training$label == 1))/nrow(lung.training)
-genData = SMOTE(lung.training[,-1], lung.training$label, dup_size = 1)
+genData = SMOTE(lung.training[,-1], lung.training$label, dup_size = 4)
 lung.training_balanced = genData$data
 length(which(lung.training_balanced$label == 1))/nrow(lung.training_balanced)
-# 192 positive obs over 917 (about 21%)
+# (about 40%)
 
-# write.csv(lung.training_balanced,"C:/Users/user/Desktop/SML/Project/lung_training_balanced.csv", 
+# write.csv(lung.training_balanced,"~/Documents/sds/sml/SML-project/dataset/lung_training_balanced.csv", 
 #           row.names = F)
 
 
