@@ -261,5 +261,68 @@ length(which(lung.training_balanced$label == 1))/nrow(lung.training_balanced)
 
 
 ############################################################
-# ♫ # Obtain dataset for 3/4 classes classification
-############################################################
+# ♫ # Obtain dataset for multiclass classification
+##################################################
+
+trunc_df2 = trunc_df2 %>%
+  mutate(CancerType = case_when (
+    primary_disease ==  "Bile Duct Cancer" ~ 1,
+    primary_disease == "Pancreatic Cancer" ~ 1,
+    primary_disease == "Gastric Cancer" ~ 1,
+    primary_disease == "Gallbladder Cancer" ~ 1,
+    primary_disease == "Esophageal Cancer" ~ 1,
+    primary_disease == "Colon/Colorectal Cancer" ~ 1,
+    primary_disease == "Liver Cancer"~ 1,
+    
+    primary_disease ==  "Ovarian Cancer" ~ 2,
+    primary_disease == "Cervical Cancer" ~ 2,
+    primary_disease == "Endometrial/Uterine Cancer" ~ 2,
+    primary_disease == "Teratoma" ~ 2,
+    
+    primary_disease ==  "Bone Cancer" ~ 3,
+    primary_disease == "Skin Cancer" ~ 3,
+    primary_disease == "Fibroblast" ~ 3,
+    primary_disease == "Sarcoma" ~ 3,
+    
+    primary_disease ==  "Brain Cancer" ~ 4,
+    primary_disease == "Neuroblastoma" ~ 4,
+    primary_disease == "Rhabdoid" ~ 4,
+    
+    primary_disease == "Breast Cancer" ~ 5,
+    primary_disease == "Breast Cancer" ~ 5,
+    
+    primary_disease ==  "Head And Neck Cancer" ~ 6,
+    primary_disease == "Thyroid Cancer" ~ 6,
+    
+    primary_disease == "Leukemia"~ 7,
+    primary_disease == "Lymphoma"~ 7,
+    primary_disease == "Myeloma"~ 7,
+    
+    primary_disease ==  "Bladder Cancer" ~ 8,
+    primary_disease == "Kidney Cancer" ~ 8,
+    primary_disease == "Prostate Cancer" ~ 8,
+    
+    primary_disease == "Lung Cancer"~ 9,
+
+    TRUE ~ 0 
+  ))
+
+
+label = trunc_df2$CancerType
+multiclass_dataset = cbind(df1, label)
+
+set.seed(8675309)
+n.train = floor(.80*dim(df1)[1])
+training = sample(1:dim(df1)[1], size = n.train, replace = FALSE)
+
+multiclass.training = multiclass_dataset[training, ]  
+multiclass.test = multiclass_dataset[-training, ]
+
+
+#write.csv(multiclass.training,"multiclass_training.csv")
+#write.csv(multiclass.test,"multiclass_test.csv")
+
+
+#write.csv(multiclass_dataset,"multiclass_dataset.csv")
+
+
