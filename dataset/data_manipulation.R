@@ -179,7 +179,7 @@ CancerCount %>%
   filter(primary_disease %in% c("Bile Duct Cancer", "Kidney Cancer", "Gastric Cancer",
                                 "Gallbladder Cancer", "Esophageal Cancer", 
                                 "Colon/Colorectal Cancer", "Liver Cancer")) %>%
-  sum(select(count))
+    sum(select(count()))
 
 
 ############################################################
@@ -250,19 +250,49 @@ lung.test = lung_dataset[-training, ]
 # write.csv(lung.test,"C:/Users/user/Desktop/SML/Project/lung_test.csv", row.names = F)
 
 # balancing the minority class using the SMOTE function 
-length(which(lung.training$label == 1))/nrow(lung.training)
-genData = SMOTE(lung.training[,-1], lung.training$label, dup_size = 4)
-lung.training_balanced = genData$data
-length(which(lung.training_balanced$label == 1))/nrow(lung.training_balanced)
+# length(which(lung.training$label == 1))/nrow(lung.training)
+# genData = SMOTE(lung.training[,-1], lung.training$label, dup_size = 4)
+# lung.training_balanced = genData$data
+# length(which(lung.training_balanced$label == 1))/nrow(lung.training_balanced)
 # (about 40%)
 
 # write.csv(lung.training_balanced,"~/Documents/sds/sml/SML-project/dataset/lung_training_balanced.csv", 
 #           row.names = F)
 
 
+
+############################################################
+# ♫ # Blood cancer VS. All
+
+trunc_df2 = trunc_df2 %>%
+  mutate(isBlood = case_when (
+    primary_disease ==  "Leukemia" ~ 1,
+    primary_disease == "Lymphoma" ~ 1,
+    primary_disease == "Myeloma" ~ 1,
+    TRUE ~ 0 
+  ))
+
+# appending this column to the CRISP dataset to have labeled data
+label = trunc_df2$isBlood
+blood_dataset = cbind(df1, label)
+
+# and splitting the data into training and test 
+set.seed(8675309)
+n.train = floor(.80*dim(df1)[1])
+training = sample(1:dim(df1)[1], size = n.train, replace = FALSE)
+
+blood.training = blood_dataset[training, ]  
+blood.test = blood_dataset[-training, ]
+
+# producing csv file of training and test
+write.csv(blood.training,"~/Documents/sds/sml/SML-project/dataset/blood_training.csv", row.names = F)
+write.csv(blood.test,"~/Documents/sds/sml/SML-project/dataset/blood_test.csv", row.names = F)
+
+
+
 ############################################################
 # ♫ # Obtain dataset for multiclass classification
-##################################################
+############################################################
 
 trunc_df2 = trunc_df2 %>%
   mutate(CancerType = case_when (
@@ -319,8 +349,8 @@ multiclass.training = multiclass_dataset[training, ]
 multiclass.test = multiclass_dataset[-training, ]
 
 
-#write.csv(multiclass.training,"multiclass_training.csv")
-#write.csv(multiclass.test,"multiclass_test.csv")
+write.csv(multiclass.training,"multiclass_training.csv")
+write.csv(multiclass.test,"multiclass_test.csv")
 
 
 #write.csv(multiclass_dataset,"multiclass_dataset.csv")
