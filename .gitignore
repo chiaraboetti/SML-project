@@ -8,3 +8,8 @@ dataset/gastro_training.csv
 dataset/lung_training_balanced.csv
 dataset/blood_test.csv
 *.csv
+model/multiclass/best_model.hdf5
+*.aux
+report/report.log
+report/report.out
+report/report.synctex.gz

@@ -4,8 +4,8 @@ library(caret)
 library(smotefamily)
 
 # load the dataset
-train = read.csv("../dataset/blood_training.csv")
-test = read.csv("../dataset/blood_test.csv")
+train = read.csv("../../dataset/blood_training.csv")
+test = read.csv("../../dataset/blood_test.csv")
 
 # balancing the minority class using the SMOTE function 
 length(which(train$label == 1))/nrow(train)

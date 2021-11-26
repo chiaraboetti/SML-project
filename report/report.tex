@@ -1,0 +1,105 @@
+\documentclass[a4paper,10pt, oneside]{article}  % document class
+\usepackage{geometry}
+\geometry{
+  inner=23mm,
+  outer=23mm,
+  top=37.125mm,
+  bottom=37.125mm,
+  heightrounded,
+  marginparwidth=90pt,
+  marginparsep=17pt,
+  headsep=24pt,
+}
+\usepackage{hyperref}
+%pacchetto
+\usepackage{import, multicol,lipsum}  % package
+\usepackage[utf8]{inputenc} % accenti facili
+\usepackage[T1]{fontenc}
+\usepackage{subcaption}
+\usepackage{pifont}
+\usepackage{url}
+\usepackage[english]{babel} % e inglese no?
+\usepackage{graphicx, color, blindtext}
+\usepackage{textcomp, makeidx, times}
+\usepackage{amsthm, amsmath, amssymb, amsfonts, mathtools} % math
+\usepackage[mathscr]{eucal}		
+\usepackage[nottoc]{tocbibind} 
+\usepackage{pgfplots, parskip}
+\usepackage{afterpage, ifthen}
+\usepackage{enumitem}
+\pgfplotsset{compat=newest}
+\usepackage{graphicx} % immagini
+\graphicspath{ {image/} } % path cartella delle immagini
+\usepackage{tikz} %graph
+\usetikzlibrary{arrows,automata}
+\usetikzlibrary{automata,arrows,positioning,calc,matrix}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{siunitx}
+\usepackage{tabularx, tabu}
+\usepackage{relsize}
+\usepackage{makecell, caption, chngcntr}
+\usepackage{bbm}
+\usepackage{diffcoeff}
+\RequirePackage{fix-cm}
+
+
+%
+%____________________________________________________________________________________________________________________________
+%____________________________________________________________________________________________________________________________
+%____________________________________________________________________________________________________________________________
+%____________________________________________________________________________________________________________________________
+% INIZIO
+\begin{document}
+
+\setcounter{secnumdepth}{2}
+\pagestyle{plain} % stile pagina (header, numerazioni)
+
+\centerline {\includegraphics[width=2cm]{logo.jpg}}
+\begin{center}
+Università degli Studi di Torino - M.Sc.  in Stochastic and Data Science - A.Y.  2021/2022
+
+\line(1,0){450}\\ 
+\vspace{0.1cm} 
+{\Large \textbf{ Final project of Statistical Machine Learning (MAT0043)}} \\ 
+\vspace{0.1cm}
+\hspace{0cm} 
+Group: Bartoli Francesco,  Boetti Chiara, Bordino Alberto (856592)
+\line(1,0){450} \\
+\end{center}
+
+%____________________________________________________________________________________________________________________________
+% INTRO
+
+\begin{multicols}{2}
+\section*{Abstract}
+
+
+\section{Introduction}
+
+
+\section{The dataset}
+
+
+\section{Methods}
+
+
+\section{Results}
+
+
+\section{Commenting the results}
+
+
+\section{Future works}
+
+
+\section{Contribution}
+
+
+\end{multicols}
+
+\begin{thebibliography}{11}   % BIBLIOGRAFIA
+\bibitem{Baum} L. Baum, T. Petrie, \textit{Statistical Inference for Probabilistic Functions of Finite State Markov Chains}, in Ann. Math. Stat., 37, 1554-1563, 1966.
+\end{thebibliography}
+\end{document}

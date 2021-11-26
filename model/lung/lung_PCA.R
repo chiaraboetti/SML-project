@@ -4,8 +4,8 @@ library(dplyr)
 library(knitr)
 #####################################################
 
-lung.train = read.csv("dataset/lung_training.csv")
-lung.test = read.csv("dataset/lung_test.csv")
+lung.train = read.csv("../../dataset/lung_training.csv")
+lung.test = read.csv("../../dataset/lung_test.csv")
 
 # To color differently in the plot
 index = which(lung.train$label == 1)
@@ -95,7 +95,7 @@ max(lung.S$d)/min(lung.S$d)
 # ♫ # PCA with adjustment for minority class 
 ############################################################
 
-lung.train_bal = read.csv("dataset/lung_training_balnced.csv")
+lung.train_bal = read.csv("../../dataset/lung_training_balnced.csv")
 
 # To color differently in the plot
 index = which(lung.train_bal$label == 1)
