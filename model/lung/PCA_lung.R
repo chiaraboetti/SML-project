@@ -14,7 +14,7 @@ col.ind[index] = "orange"
 
 
 ############################################################
-# ♫ # Rough PCA
+# ??? # Rough PCA
 ############################################################
 
 # A full-rank dispersion matrix S [variance-covariance] cannot be 
@@ -69,9 +69,9 @@ legend("bottomright", legend = c("Lung Cancer", "Other"),
 # Both two and three PCs show a cloud of points, which means they
 # do not provide enough information
 
-boxplot(lung.pca$x[,1], main = "PC1")
-boxplot(lung.pca$x[,2], main = "PC2")
-boxplot(lung.pca$x[,3], main = "PC3")
+boxplot(lung.pca$x[,1], main = "PC1", outpch = 16, outcol = col.ind)
+boxplot(lung.pca$x[,2], main = "PC2", outpch = 16, outcol = col.ind)
+boxplot(lung.pca$x[,3], main = "PC3", outpch = 16, outcol = col.ind)
 
 
 # Let us try with the svd (= singular value decomposition) function
@@ -92,18 +92,24 @@ max(lung.S$d)/min(lung.S$d)
 
 
 ############################################################
-# ♫ # PCA with adjustment for minority class 
+# ??? # PCA with adjustment for minority class 
 ############################################################
 
 lung.train_bal = read.csv("../../dataset/lung_training_balnced.csv")
+
+length(which(lung.train_bal$label == 1))/nrow(lung.train_bal)
+# about 21%
 
 # To color differently in the plot
 index = which(lung.train_bal$label == 1)
 col.ind = rep("steelblue", dim(lung.train_bal)[1])
 col.ind[index] = "orange"
 
+colnames(lung.train_bal)[c(1, 17394, 17395)]
+which(lung.train_bal$label != lung.train_bal$class)
+
 lung.pca_bal = lung.train_bal %>%
-  select(-c(DepMap_ID, label)) %>%
+  select(-c(label, class)) %>%
   prcomp()
 
 var_explained = lung.pca_bal$sdev^2/sum(lung.pca_bal$sdev^2)
@@ -116,6 +122,3 @@ as.data.frame(lung.pca_bal$x) %>%
   ggtitle("PC1 vs. PC2") + 
   labs(x = paste0("PC1: ", round(var_explained[1]*100,1), "%"),
        y = paste0("PC2: ", round(var_explained[2]*100,1), "%"))
-
-
-# Conclusion: there is no improvement
