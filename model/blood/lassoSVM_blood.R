@@ -26,13 +26,8 @@ log(cv.SVM$lambda.min)
 
 # fit this SVM
 lasso.SVM = sparseSVM(train_X, train_y, lambda = cv.SVM$lambda.min)
-sum(lasso.SVM$weights > 0)
 pred_y = predict(object = lasso.SVM, X = test_X)
 confusionMatrix(factor(pred_y), factor(test_y))
 
-# fit Lasso regularization to achieve sparsity
-lasso.SVM = sparseSVM(train_X, train_y, alpha = 1, lambda = 0.01)
-sum(lasso.SVM$weights > 0)
-pred_y = predict(object = lasso.SVM, X = test_X)
-confusionMatrix(factor(pred_y), factor(test_y))
-
+sum(lasso.SVM$weights != 0)
+# We have selected 114 variables
