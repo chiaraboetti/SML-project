@@ -2,6 +2,9 @@
 library(sparseSVM)
 library(caret)
 library(smotefamily)
+library(tidyverse)
+library(caret)
+library(glmnet)
 
 # load the dataset
 train = read.csv("../../dataset/blood_training.csv")
@@ -19,15 +22,18 @@ train_y = train$label
 test_X = as.matrix(test[, -c(1,17395)])
 test_y = test$label
 
-# choose the best alpha (ElasticNet) and lambda (for shrinkage) with 10-fold-cv
-cv.SVM = cv.sparseSVM(train_X, train_y, seed = 42)
-plot(cv.SVM)
-log(cv.SVM$lambda.min)
 
-# fit this SVM
-lasso.SVM = sparseSVM(train_X, train_y, lambda = cv.SVM$lambda.min)
-pred_y = predict(object = lasso.SVM, X = test_X)
+# Find the best lambda using cross-validation
+set.seed(42) 
+cv.lasso = cv.glmnet(train_X, train_y, alpha = 1, family = "binomial")
+model =  glmnet(train_X, train_y, alpha = 1, family = "binomial",
+                lambda = cv.lasso$lambda.min)
+
+plot(cv.lasso)
+
+# Make predictions on the test data
+probabilities = model %>% predict(newx = test_X)
+predicted.classes = ifelse(probabilities > 0.5, 1, 0)
 confusionMatrix(factor(pred_y), factor(test_y))
 
-sum(lasso.SVM$weights != 0)
-# We have selected 114 variables
+
