@@ -13,3 +13,4 @@ model/multiclass/best_model.hdf5
 report/report.log
 report/report.out
 report/report.synctex.gz
+*.hdf5
