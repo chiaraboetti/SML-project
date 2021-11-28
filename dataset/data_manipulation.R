@@ -6,15 +6,15 @@ library(smotefamily)
 `%notin%` <- Negate(`%in%`)
 #####################################################
 
-df1 = read.csv("CRISPR_gene_dependency.csv")
-df2 = read.csv("sample_info.csv")
+df1 = read.csv("dataset/CRISPR_gene_dependency.csv")
+df2 = read.csv("dataset/sample_info.csv")
 
 # checking if label of df1 are all contained in df2
 prod(rownames(df1) %in% rownames(df2))
 
 
 ############################################################
-# ♫ # (de-)Capitalize columns in df2 and filter it
+# ??? # (de-)Capitalize columns in df2 and filter it
 ############################################################
 
 unique(df2$primary_disease)
@@ -36,7 +36,7 @@ trunc_df2 = df2 %>%
   filter(DepMap_ID %in% df1$DepMap_ID)
 
 ############################################################
-# ♫ # Looking for weird obs labels
+# ??? # Looking for weird obs labels
 ############################################################
 which(trunc_df2$primary_disease == "Unknown")
 which(trunc_df2$primary_disease == "")
@@ -64,9 +64,11 @@ trunc_df2 %>%
 # AUT keep them all, but putting them into the classes wtr the sample
 # collection site.
 
+# Conclusion: we remove the 2 Non-Cancerous cells and keep
+#             Engineered cells
 
 ############################################################
-# ♫ # Checking for NAs
+# ??? # Checking for NAs
 ############################################################
 nas = data.frame(which(is.na(df1), arr.ind = TRUE))
 nas = nas[order(nas$row), ]
@@ -87,6 +89,8 @@ NaCount = nas %>%
 NaCount = cbind(df1$DepMap_ID[unique(nas$row)], NaCount)
 colnames(NaCount) = c("DepMap_ID", "Row_index", "Count")
 kable(NaCount)
+# REM: weird obs are c(715, 986, 996, 1024, 1025, 1026, 1027, 1028)
+# --> No correspondence with Na
 
 trunc_df2 %>%
   filter(DepMap_ID %in% nas$DepMap_ID) %>%
@@ -95,7 +99,7 @@ trunc_df2 %>%
 # Nothing particular, obs seem unrelated
 
 # Since there are only ten obs which have NA values, we decide 
-#to remove them all:
+# to remove them all:
 df1 = df1 %>%
   filter(DepMap_ID %notin% NaCount$DepMap_ID)
 trunc_df2 = trunc_df2 %>%
@@ -104,17 +108,13 @@ trunc_df2 = trunc_df2 %>%
 data.frame(which(is.na(df1), arr.ind = TRUE))
 data.frame(which(is.na(trunc_df2$primary_disease), arr.ind = TRUE))
 
-# NaCount[NaCount$Count > 1000, ]$Row_index # to be deleted
-# 
-# new_df1 = df1 %>%
-#   filter(DepMap_ID %notin% NaCount[NaCount$Count > 1000, ]$DepMap_ID)
-# 
-# # And let us replace NA with 0
-# new_df1[is.na(new_df1)] = 0
+# Weird obs:
+which(trunc_df2$primary_disease %in% c("Non-Cancerous", "Engineered"))
+# --> c(707, 976, 986, 1014, 1015, 1016, 1017, 1018)
 
 
 ############################################################
-# ♫ # Check if df1 is a data.frame of probabilities
+# ??? # Check if df1 is a data.frame of probabilities
 ############################################################
 
 ## check if entries are in [0, 1]: ok!
@@ -130,7 +130,7 @@ row.sum = rowSums(df1 %>% select(-DepMap_ID))
 
 
 ############################################################
-# ♫ # Comparison btw primary_disease and sample_collection_site
+# ??? # Comparison btw primary_disease and sample_collection_site
 ############################################################
 
 cat("n. diseases =", length(unique(trunc_df2$primary_disease)), 
@@ -147,8 +147,10 @@ CancerSiteCount %>%
   group_by(disease, site) %>% 
   summarise(count = n()) %>%
   kable()
-# Stranger things: probably it is not a good idea looking at the
-# sample sites for the clusters
+# Peculiarities. probably because of metastasis:
+# for instance, some Brain cancer cells have been collected
+# from the abdomen, Lung cancer cells from a variety of 
+# different places
 
 ggplot(CancerSiteCount, aes(x = disease)) +
   geom_histogram(aes(fill = site), stat = "count") +
@@ -156,11 +158,16 @@ ggplot(CancerSiteCount, aes(x = disease)) +
   labs(x = "Type of cancer", y = "How many obs") +
   theme(axis.text.x = element_text(angle = 70, hjust = 1), 
         plot.title = element_text(hjust = 0.5))
-# Conclusion: just stick to the primary_disease for clusters 
+
+# Conclusion: we retain that it is not a good idea
+# looking at the sample sites for deciding how to
+# group cancer types together
+# Another idea could be using an unsupervised cluster
+# algorithm
 
 
 ############################################################
-# ♫ # Count obs wrt primary disease
+# ??? # Count obs wrt primary disease
 ############################################################
 
 ggplot(trunc_df2, aes(x = primary_disease)) +
@@ -179,28 +186,34 @@ CancerCount %>%
   filter(primary_disease %in% c("Bile Duct Cancer", "Kidney Cancer", "Gastric Cancer",
                                 "Gallbladder Cancer", "Esophageal Cancer", 
                                 "Colon/Colorectal Cancer", "Liver Cancer")) %>%
-    sum(select(count()))
+  select(count) %>%
+  sum()
 
+CancerCount %>%
+  filter(primary_disease %in% c("Leukemia", "Lymphoma", "Myeloma")) %>%
+  select(count) %>%
+  sum()
 
 ############################################################
-# ♫ # Obtain a dataset for binary classification 
+# ??? # Obtain a dataset for binary classification 
 ############################################################
 
-# We decide to try two binary classification problems:
-# - gastrointestinal vs all: this class has the highest number 
-#                            of obs but heterogeneous
-#   (205 obs)
+# We decide which are the labels related to various types of
+# cancer according to [https://www.cancer.gov/types/by-body-location]
+# In particular, different classification problems:
+# - multi-classification
 # - lung vs all: fewer number of obs but homogeneous
 #   (126 obs)
+# - blood vs all: fewer number of obs but homogeneous
+#   (109 obs)
+
 
 ############################################################
-# Gastrointestinal cancers VS. All the others
-# We decide which are the labels related to Gastrointestinal
-# cancers according to [https://www.cancer.gov/types/by-body-location]
+# ??? # Gastrointestinal cancers VS. All
 
 trunc_df2 = trunc_df2 %>%
   mutate(isGastro = case_when (
-    primary_disease ==  "Bile Duct Cancer" ~ 1,
+    primary_disease == "Bile Duct Cancer" ~ 1,
     primary_disease == "Kidney Cancer" ~ 1,
     primary_disease == "Gastric Cancer" ~ 1,
     primary_disease == "Gallbladder Cancer" ~ 1,
@@ -228,7 +241,7 @@ gastro.test = gastro_dataset[-training, ]
 
 
 ############################################################
-# ♫ # Lung cancer VS. All
+# ??? # Lung cancer VS. All
 
 trunc_df2 = trunc_df2 %>%
   mutate(isLung = as.numeric(primary_disease == "Lung Cancer"))
@@ -250,23 +263,24 @@ lung.test = lung_dataset[-training, ]
 # write.csv(lung.test,"C:/Users/user/Desktop/SML/Project/lung_test.csv", row.names = F)
 
 # balancing the minority class using the SMOTE function 
-# length(which(lung.training$label == 1))/nrow(lung.training)
-# genData = SMOTE(lung.training[,-1], lung.training$label, dup_size = 4)
-# lung.training_balanced = genData$data
-# length(which(lung.training_balanced$label == 1))/nrow(lung.training_balanced)
-# (about 40%)
+length(which(lung.training$label == 1))/nrow(lung.training)
 
-# write.csv(lung.training_balanced,"~/Documents/sds/sml/SML-project/dataset/lung_training_balanced.csv", 
+genData = SMOTE(lung.training[,-1], lung.training$label, dup_size = 1)
+lung.training_balanced = genData$data
+
+length(which(lung.training_balanced$label == 1))/nrow(lung.training_balanced)
+# 192 positive obs over 917 (about 21%)
+
+# write.csv(lung.training_balanced,"C:/Users/user/Desktop/SML/Project/lung_training_balanced.csv", 
 #           row.names = F)
 
 
-
 ############################################################
-# ♫ # Blood cancer VS. All
+# ??? # Blood cancer VS. All
 
 trunc_df2 = trunc_df2 %>%
   mutate(isBlood = case_when (
-    primary_disease ==  "Leukemia" ~ 1,
+    primary_disease == "Leukemia" ~ 1,
     primary_disease == "Lymphoma" ~ 1,
     primary_disease == "Myeloma" ~ 1,
     TRUE ~ 0 
@@ -285,18 +299,19 @@ blood.training = blood_dataset[training, ]
 blood.test = blood_dataset[-training, ]
 
 # producing csv file of training and test
-write.csv(blood.training,"~/Documents/sds/sml/SML-project/dataset/blood_training.csv", row.names = F)
-write.csv(blood.test,"~/Documents/sds/sml/SML-project/dataset/blood_test.csv", row.names = F)
+# write.csv(blood.training,"~/Documents/sds/sml/SML-project/dataset/blood_training.csv", row.names = F)
+# write.csv(blood.test,"~/Documents/sds/sml/SML-project/dataset/blood_test.csv", row.names = F)
 
 
 
 ############################################################
-# ♫ # Obtain dataset for multiclass classification
+# ??? # Obtain dataset for multiclass classification
 ############################################################
 
-trunc_df2 = trunc_df2 %>%
+trunc_df2_bis = trunc_df2 %>%
+  filter(primary_disease != "Non-Cancerous") %>%
   mutate(CancerType = case_when (
-    primary_disease ==  "Bile Duct Cancer" ~ 1,
+    primary_disease == "Bile Duct Cancer" ~ 1,
     primary_disease == "Pancreatic Cancer" ~ 1,
     primary_disease == "Gastric Cancer" ~ 1,
     primary_disease == "Gallbladder Cancer" ~ 1,
@@ -304,55 +319,71 @@ trunc_df2 = trunc_df2 %>%
     primary_disease == "Colon/Colorectal Cancer" ~ 1,
     primary_disease == "Liver Cancer"~ 1,
     
-    primary_disease ==  "Ovarian Cancer" ~ 2,
+    primary_disease == "Ovarian Cancer" ~ 2,
     primary_disease == "Cervical Cancer" ~ 2,
     primary_disease == "Endometrial/Uterine Cancer" ~ 2,
     primary_disease == "Teratoma" ~ 2,
     
-    primary_disease ==  "Bone Cancer" ~ 3,
+    primary_disease == "Bone Cancer" ~ 3,
     primary_disease == "Skin Cancer" ~ 3,
     primary_disease == "Fibroblast" ~ 3,
     primary_disease == "Sarcoma" ~ 3,
+    primary_disease == "Liposarcoma" ~ 3,
     
-    primary_disease ==  "Brain Cancer" ~ 4,
+    primary_disease == "Brain Cancer" ~ 4,
     primary_disease == "Neuroblastoma" ~ 4,
     primary_disease == "Rhabdoid" ~ 4,
     
     primary_disease == "Breast Cancer" ~ 5,
-    primary_disease == "Breast Cancer" ~ 5,
     
-    primary_disease ==  "Head And Neck Cancer" ~ 6,
+    primary_disease == "Head And Neck Cancer" ~ 6,
     primary_disease == "Thyroid Cancer" ~ 6,
     
     primary_disease == "Leukemia"~ 7,
     primary_disease == "Lymphoma"~ 7,
     primary_disease == "Myeloma"~ 7,
     
-    primary_disease ==  "Bladder Cancer" ~ 8,
+    primary_disease == "Bladder Cancer" ~ 8,
     primary_disease == "Kidney Cancer" ~ 8,
     primary_disease == "Prostate Cancer" ~ 8,
+    (primary_disease == "Engineered") & (sample_collection_site == "Kidney") ~ 8,
     
-    primary_disease == "Lung Cancer"~ 9,
-
+    primary_disease == "Lung Cancer" ~ 9,
+    
+    primary_disease == "Eye Cancer" ~ 10,
+    (primary_disease == "Engineered") & (sample_collection_site == "Eye") ~ 10,
+    
     TRUE ~ 0 
   ))
 
+label = trunc_df2_bis$CancerType
 
-label = trunc_df2$CancerType
-multiclass_dataset = cbind(df1, label)
+df1_bis = df1 %>%
+  filter(DepMap_ID %in% trunc_df2_bis$DepMap_ID)
+multiclass_dataset = cbind(df1_bis, label)
 
 set.seed(8675309)
-n.train = floor(.80*dim(df1)[1])
-training = sample(1:dim(df1)[1], size = n.train, replace = FALSE)
+n.train = floor(.80*dim(df1_bis)[1])
+training = sample(1:dim(df1_bis)[1], size = n.train, replace = FALSE)
 
 multiclass.training = multiclass_dataset[training, ]  
 multiclass.test = multiclass_dataset[-training, ]
 
-
-write.csv(multiclass.training,"multiclass_training.csv")
-write.csv(multiclass.test,"multiclass_test.csv")
-
-
-#write.csv(multiclass_dataset,"multiclass_dataset.csv")
+# write.csv(multiclass.training,"C:/Users/user/Desktop/SML/Project/multiclass_training.csv", 
+#           row.names = F)
+# write.csv(multiclass.test,"C:/Users/user/Desktop/SML/Project/multiclass_test.csv", 
+#           row.names = F)
 
 
+
+ggplot(trunc_df2_bis, aes(x = as.factor(CancerType))) +
+  geom_bar(aes(fill = primary_disease), width = 0.55, 
+           position = position_dodge(width = 0.75)) +
+  ggtitle("Cancers by Body Location/System") +
+  labs(x = "Location", y = "How many obs") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1), 
+        plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(labels = c("Gastrointestinal", "Gynecologic", "Musculoskeletal",
+                              "Neurologic", "Breast", "Head-Neck", "Hematologic",
+                              "Genitourinary", "Lung", "Eye")) +
+  scale_fill_discrete(name = "Primary disease")
