@@ -6,8 +6,8 @@ library(smotefamily)
 `%notin%` <- Negate(`%in%`)
 #####################################################
 
-df1 = read.csv("dataset/CRISPR_gene_dependency.csv")
-df2 = read.csv("dataset/sample_info.csv")
+df1 = read.csv("CRISPR_gene_dependency.csv")
+df2 = read.csv("sample_info.csv")
 
 # checking if label of df1 are all contained in df2
 prod(rownames(df1) %in% rownames(df2))
@@ -377,10 +377,10 @@ multiclass.test = multiclass_dataset[-training, ]
 
 
 ggplot(trunc_df2_bis, aes(x = as.factor(CancerType))) +
-  geom_bar(aes(fill = primary_disease), width = 0.55, 
-           position = position_dodge(width = 0.75)) +
+  geom_bar(aes(fill = as.factor(label)), width = 0.55, 
+           position = position_dodge(width = 0.75), show.legend = FALSE) +
   ggtitle("Cancers by Body Location/System") +
-  labs(x = "Location", y = "How many obs") +
+  labs(x = "Location", y = "Number of obs") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1), 
         plot.title = element_text(hjust = 0.5)) +
   scale_x_discrete(labels = c("Eye", "Gastrointestinal", "Gynecologic", "Musculoskeletal",
