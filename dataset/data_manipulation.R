@@ -375,15 +375,31 @@ multiclass.test = multiclass_dataset[-training, ]
 #           row.names = F)
 
 
+df.x = subset(multiclass_dataset, select = c(1, 17395))
+df.y = subset(trunc_df2_bis, select = c(1, 18))
+plot.df = merge(df.x, df.y)
+plot.df = plot.df %>% arrange(label)
 
-ggplot(trunc_df2_bis, aes(x = as.factor(CancerType))) +
-  geom_bar(aes(fill = as.factor(label)), width = 0.55, 
-           position = position_dodge(width = 0.75), show.legend = FALSE) +
+ggplot(plot.df, aes(x=primary_disease, fill=as.factor(label))) +
+  geom_bar(width = 0.55, 
+           position = position_dodge(width = 0.75)) +
   ggtitle("Cancers by Body Location/System") +
   labs(x = "Location", y = "Number of obs") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1), 
         plot.title = element_text(hjust = 0.5)) +
-  scale_x_discrete(labels = c("Eye", "Gastrointestinal", "Gynecologic", "Musculoskeletal",
+  scale_x_discrete(labels = unique(plot.df$primary_disease)) +
+  scale_fill_discrete(name = "Primary disease")
+
+
+ggplot(trunc_df2_bis, aes(x = as.factor(CancerType))) +
+  geom_bar(aes(fill = as.factor(label)), width = 0.55, 
+           position = position_dodge(width = 0.75), show.legend = FALSE) +
+    ggtitle("Cancers by Body Location/System") +
+    labs(x = "Location", y = "Number of obs") +
+    theme(axis.text.x = element_text(angle = 60, hjust = 1), 
+          plot.title = element_text(hjust = 0.5)) +
+    scale_x_discrete(labels = c("Eye", "Gastrointestinal", "Gynecologic", "Musculoskeletal",
                               "Neurologic", "Breast", "Head-Neck", "Hematologic",
                               "Genitourinary", "Lung")) +
   scale_fill_discrete(name = "Primary disease")
+  
