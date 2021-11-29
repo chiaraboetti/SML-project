@@ -311,6 +311,9 @@ blood.test = blood_dataset[-training, ]
 trunc_df2_bis = trunc_df2 %>%
   filter(primary_disease != "Non-Cancerous") %>%
   mutate(CancerType = case_when (
+    primary_disease == "Eye Cancer" ~ 0,
+    (primary_disease == "Engineered") & (sample_collection_site == "Eye") ~ 0,
+    
     primary_disease == "Bile Duct Cancer" ~ 1,
     primary_disease == "Pancreatic Cancer" ~ 1,
     primary_disease == "Gastric Cancer" ~ 1,
@@ -350,10 +353,7 @@ trunc_df2_bis = trunc_df2 %>%
     
     primary_disease == "Lung Cancer" ~ 9,
     
-    primary_disease == "Eye Cancer" ~ 10,
-    (primary_disease == "Engineered") & (sample_collection_site == "Eye") ~ 10,
-    
-    TRUE ~ 0 
+    TRUE ~ 10 
   ))
 
 label = trunc_df2_bis$CancerType
@@ -383,7 +383,7 @@ ggplot(trunc_df2_bis, aes(x = as.factor(CancerType))) +
   labs(x = "Location", y = "How many obs") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1), 
         plot.title = element_text(hjust = 0.5)) +
-  scale_x_discrete(labels = c("Gastrointestinal", "Gynecologic", "Musculoskeletal",
+  scale_x_discrete(labels = c("Eye", "Gastrointestinal", "Gynecologic", "Musculoskeletal",
                               "Neurologic", "Breast", "Head-Neck", "Hematologic",
-                              "Genitourinary", "Lung", "Eye")) +
+                              "Genitourinary", "Lung")) +
   scale_fill_discrete(name = "Primary disease")
