@@ -308,12 +308,78 @@ blood.test = blood_dataset[-training, ]
 # ??? # Obtain dataset for multiclass classification
 ############################################################
 
+##################################################
+### MULTICLASS NO WEIRD OBS###
+
+trunc_df2_bis = trunc_df2 %>%
+  filter(primary_disease %notin% c("Non-Cancerous","Engineered", "Eye Cancer")) %>%
+  mutate(CancerType = case_when (
+    primary_disease == "Bile Duct Cancer" ~ 0,
+    primary_disease == "Pancreatic Cancer" ~ 0,
+    primary_disease == "Gastric Cancer" ~ 0,
+    primary_disease == "Gallbladder Cancer" ~ 0,
+    primary_disease == "Esophageal Cancer" ~ 0,
+    primary_disease == "Colon/Colorectal Cancer" ~ 0,
+    primary_disease == "Liver Cancer"~ 0,
+    
+    primary_disease == "Ovarian Cancer" ~ 1,
+    primary_disease == "Cervical Cancer" ~ 1,
+    primary_disease == "Endometrial/Uterine Cancer" ~ 1,
+    primary_disease == "Teratoma" ~ 1,
+    
+    primary_disease == "Bone Cancer" ~ 2,
+    primary_disease == "Skin Cancer" ~ 2,
+    primary_disease == "Fibroblast" ~ 2,
+    primary_disease == "Sarcoma" ~ 2,
+    primary_disease == "Liposarcoma" ~ 2,
+    
+    primary_disease == "Brain Cancer" ~ 3,
+    primary_disease == "Neuroblastoma" ~ 3,
+    primary_disease == "Rhabdoid" ~ 3,
+    
+    primary_disease == "Breast Cancer" ~ 4,
+    
+    primary_disease == "Head And Neck Cancer" ~ 5,
+    primary_disease == "Thyroid Cancer" ~ 5,
+    
+    primary_disease == "Leukemia"~ 6,
+    primary_disease == "Lymphoma"~ 6,
+    primary_disease == "Myeloma"~ 6,
+    
+    primary_disease == "Bladder Cancer" ~ 7,
+    primary_disease == "Kidney Cancer" ~ 7,
+    primary_disease == "Prostate Cancer" ~ 7,
+    
+    primary_disease == "Lung Cancer" ~ 8,
+
+    TRUE ~ 9 
+  ))
+
+
+label = trunc_df2_bis$CancerType
+
+df1_bis = df1 %>%
+  filter(DepMap_ID %in% trunc_df2_bis$DepMap_ID)
+multiclass_dataset = cbind(df1_bis, label)
+
+set.seed(8675309)
+n.train = floor(.80*dim(df1_bis)[1])
+training = sample(1:dim(df1_bis)[1], size = n.train, replace = FALSE)
+
+multiclass.training = multiclass_dataset[training, ]  
+multiclass.test = multiclass_dataset[-training, ]
+
+
+
+write.csv(multiclass.training,"multiclass_training_no_weird_obs.csv")
+write.csv(multiclass.test,"multiclass_test_no_weird_obs.csv")
+
+############################################################
+### MULTICLASS ###
+
 trunc_df2_bis = trunc_df2 %>%
   filter(primary_disease != "Non-Cancerous") %>%
   mutate(CancerType = case_when (
-    primary_disease == "Eye Cancer" ~ 0,
-    (primary_disease == "Engineered") & (sample_collection_site == "Eye") ~ 0,
-    
     primary_disease == "Bile Duct Cancer" ~ 1,
     primary_disease == "Pancreatic Cancer" ~ 1,
     primary_disease == "Gastric Cancer" ~ 1,
@@ -353,8 +419,12 @@ trunc_df2_bis = trunc_df2 %>%
     
     primary_disease == "Lung Cancer" ~ 9,
     
+    primary_disease == "Eye Cancer" ~ 0,
+    (primary_disease == "Engineered") & (sample_collection_site == "Eye") ~ 0,
+    
     TRUE ~ 10 
   ))
+
 
 label = trunc_df2_bis$CancerType
 
@@ -368,6 +438,14 @@ training = sample(1:dim(df1_bis)[1], size = n.train, replace = FALSE)
 
 multiclass.training = multiclass_dataset[training, ]  
 multiclass.test = multiclass_dataset[-training, ]
+
+
+
+write.csv(multiclass.training,"multiclass_training.csv")
+write.csv(multiclass.test,"multiclass_test.csv")
+
+
+#write.csv(multiclass_dataset,"multiclass_dataset.csv")
 
 # write.csv(multiclass.training,"C:/Users/user/Desktop/SML/Project/multiclass_training.csv", 
 #           row.names = F)
