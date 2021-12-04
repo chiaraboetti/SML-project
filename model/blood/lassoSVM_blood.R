@@ -1,22 +1,20 @@
 # LASSO-SVM 
 library(sparseSVM)
 library(caret)
-library(smotefamily)
 
 # load the dataset
-train = read.csv("../../dataset/blood_training.csv")
-test = read.csv("../../dataset/blood_test.csv")
+dataset = read.csv("../../dataset/blood_dataset.csv")
 
-# balancing the minority class using the SMOTE function 
-length(which(train$label == 1))/nrow(train)
-genData = SMOTE(train[,-1], train$label, dup_size = 6)
-blood.training_balanced = genData$data
-length(which(blood.training_balanced$label == 1))/nrow(blood.training_balanced)
+# splitting into two datasets
+set.seed(42)
+split_dummy = sample(c(rep(0, 0.7 * nrow(dataset)), rep(1, 0.3 * nrow(dataset))))
+train = dataset[split_dummy == 0, ]  
+test = dataset[split_dummy == 1, ]  
 
-train_X = as.matrix(train[, -c(1, 17395)])
+train_X = as.matrix(train[, -c(1, 2, 17396)])
 train_y = train$label
 
-test_X = as.matrix(test[, -c(1,17395)])
+test_X = as.matrix(test[, -c(1, 2, 17396)])
 test_y = test$label
 
 # choose the best alpha (ElasticNet) and lambda (for shrinkage) with 10-fold-cv
@@ -30,4 +28,6 @@ pred_y = predict(object = lasso.SVM, X = test_X)
 confusionMatrix(factor(pred_y), factor(test_y))
 
 sum(lasso.SVM$weights != 0)
-# We have selected 114 variables
+# We have selected 108 variables and achieved great accuracy!!
+
+
