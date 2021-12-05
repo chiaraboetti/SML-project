@@ -60,10 +60,6 @@ multiSVM.predict = function(dataset){
   return(pred)
 }
 
-for (obs in test_X){
-  print(obs[] 1])
-}
-
 
 # testing
 test_X = as.matrix(test[, -c(17394)])
