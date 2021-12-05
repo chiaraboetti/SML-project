@@ -12,7 +12,8 @@ index = which(blood$label == 1)
 col.ind = rep("steelblue", dim(blood)[1])
 col.ind[index] = "red"
 
-colnames(blood)
+colnames(blood)[1:4]
+# Need to remove X and DepMap_ID
 
 ############################################################
 #     Rough PCA                                            #
@@ -24,9 +25,9 @@ blood.pca = blood %>%
   select(-c(X, DepMap_ID, label)) %>%
   prcomp()
 
-# As expected, we obtained 817 PCs. This is ok, since we are
-# doing selection variables: we hope that the first 20 PCs are
-# enough to obtain a proper classification
+# As expected, we obtained 1022 PCs. This is ok, since we are
+# doing selection variables: we hope that the first 50 or 100 PCs
+# are enough to obtain a proper classification
 
 var_explained = blood.pca$sdev^2/sum(blood.pca$sdev^2)
 round(cumsum(var_explained[1:370]), 4)
