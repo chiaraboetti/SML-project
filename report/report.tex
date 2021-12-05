@@ -1,14 +1,14 @@
-\documentclass[a4paper,10pt, oneside]{article}  % document class
+\documentclass[a4paper,11pt, oneside]{article}  % document class
 \usepackage{geometry}
 \geometry{
   inner=23mm,
   outer=23mm,
-  top=37.125mm,
-  bottom=37.125mm,
-  heightrounded,
-  marginparwidth=90pt,
-  marginparsep=17pt,
-  headsep=24pt,
+  top=30mm,
+  bottom=25mm %
+%  heightrounded,
+%  marginparwidth=50pt,
+%  marginparsep=17pt,
+%  headsep=20pt
 }
 \usepackage{hyperref}
 %pacchetto
@@ -58,36 +58,29 @@
 
 \centerline {\includegraphics[width=2cm]{logo.jpg}}
 \begin{center}
-Università degli Studi di Torino - M.Sc.  in Stochastic and Data Science - A.Y.  2021/2022
-
+Università degli Studi di Torino - M.Sc.  in Stochastic and Data Science - A.Y.  2021/2022 \\
+\Large { Final project of Statistical Machine Learning (MAT0043)}
 \line(1,0){450}\\ 
-\vspace{0.1cm} 
-{\Large \textbf{ Final project of Statistical Machine Learning (MAT0043)}} \\ 
+\vspace{0.4cm} 
+{ \huge \textbf{Gene selection for cancer type classification} }
 \vspace{0.1cm}
-\hspace{0cm} 
-Group: Bartoli Francesco,  Boetti Chiara (854411), Bordino Alberto (856592) [questa parte e' poi da togliere]
+%\hspace{0cm} 
+%Group: Bartoli Francesco,  Boetti Chiara (854411), Bordino Alberto (856592)
 \line(1,0){450} \\
 \end{center}
 
 %____________________________________________________________________________________________________________________________
-% INTRO
-
-\section*{Abstract}
-\textit{Riassunto delle puntate precedenti:}
-\begin{itemize}
-\item Oggigiorno la medicina ha a disposizione una grande varieta' di dati che possono essere sfruttati per migliorare ed accelerare la ricerca. In particolare, i genome scale screens sono utilizzati nell'identificare i geni che influiscono maggiormente la crescita di cellule cancerogene cancro. \\
-\item In questo progetto, applichiamo up-to-date tecniche di SML per classificare i tipi di cancro e trovare quali sono i geni piu' impattanti. Ad esempio, utilizziamo RF, NN, Lasso-SVM e Logistic-Lasso\\
-\item In particolare, vediamo come la stessa tecnica di classificazione da' risultati differenti a seconda del cancro considerato. Questo perche' l'analisi di questi dati e' abbastanza tricky: c'e' una grande (grandissima) quantita' di dati, molto correlati tra loro e (altra ragione). \\
-\item Non so se vogliamo gia' mettere dei risultati conclusi qua
-\end{itemize}
+% ABSTRACT
+In recent years, medicine has made a great step forward in finding new and efficient therapies for different diseases. Thanks to up-to-date technologies, collecting huge amount of data is no longer an issue, so that one can exploit them to define personalised treatments for patients. In particular, cancer genome scale screens are just one example of these applications. In particular, they provide valuable information about the role of genes in driving cancer growth. Thus, researches has developed a Cancer Dependency Map in order to identify genetic and pharmacologic dependencies. However, this is quite a challenging aim: the dataset is not at all easy to handle (high-dimensional, over than $\sim 17.000$ features) and the picked drug-targetable genes should only rely on a specific cancer type, thus imbalanced classes. \\
+In this project, we apply sophisticated Statistical Machine Learning algorithms to classify different cancer types and select the most relevant genes. After a quick exploratory analysis with PCA, we try Random Forest, Lasso-SVM and Neural Network classifiers and see how the same technique performs differently according to which tumor we are focusing on. In fact, our classification accuracies range from $45\%$ to $98\%$.  \textbf{Aggiungere altre conclusioni}
+\medskip
 
 \begin{multicols}{2}
-
 \section{Introduction}
-Leggere l'articolo di Fra. \\
+%The mutations that cause cancer cells to grow also confer specific vulnerabilities that normal cells lack. Some of these acquired alterations represent compelling therapeutic targets. The challenge is that, for the overwhelming majority of cancers, we do not fully understand the relationship between the genetic alterations of cancer and the dependencies they cause. To solve this problem, we are creating a “cancer dependency map” by systematically identifying genetic dependencies and small molecule sensitivities and discovering the biomarkers that predict them.
 Scrivere che il cancro e' una malattia molto brutta e brevemente come funziona (aka le cellule impazziscono: svillupano mutazioni, diventano imprevedibile e causano problemi negli individui...). Il compito della medicina e' trovare delle cure (banana). E qua entra in gico DepMap: DNA arrays che raccolgono mutationi dei geni delle cellule cancerogene.
 
-\section{The dataset}
+\section{Dataset}
 
 
 \section{Methods}
@@ -96,13 +89,8 @@ Scrivere che il cancro e' una malattia molto brutta e brevemente come funziona (
 \section{Results}
 
 
-\section{Commenting the results}
 
-
-\section{Future works}
-
-
-\section{Contribution}
+\section{Conclusion and future works}
 
 
 \end{multicols}
