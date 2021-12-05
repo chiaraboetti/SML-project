@@ -34,26 +34,26 @@ multiSVM = function(data){
 }
 
 
-multiSVMpredict_obs = function(observation){
+multiSVMpredict_obs = function(observation, ovo_model){
   predictions = c()
-  for (model_i in my_model){
+  for (model_i in ovo_model){
     pred_y = predict(object = model_i, X=observation)
     predictions = c(predictions, pred_y)
   }
   return(as.factor(predictions))
 }
 
-multiSVM.single_pred = function(observation){
-  global_pred = multiSVMpredict_obs(observation)
+multiSVM.single_pred = function(observation, ovo_model){
+  global_pred = multiSVMpredict_obs(observation, ovo_model)
   tmp = as.data.frame(table(global_pred))
   return(which.max(tmp$Freq) - 1)
 }
 
-multiSVM.predict = function(dataset){
+multiSVM.predict = function(dataset, ovo_model){
   pred = c()
   for (row in 1:nrow(dataset)){
     obs = dataset[row, ]
-    pred_y = multiSVM.single_pred(obs)
+    pred_y = multiSVM.single_pred(obs, ovo_model)
     pred = c(pred, pred_y)
   }
   
@@ -67,6 +67,6 @@ test_y = test$label
 
 
 my_model = multiSVM(train)
-pred_y = multiSVM.predict(test_X)
+pred_y = multiSVM.predict(test_X, my_model)
 confusionMatrix(factor(pred_y), factor(test_y))
 
