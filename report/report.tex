@@ -70,25 +70,23 @@ Università degli Studi di Torino - M.Sc.  in Stochastic and Data Science - A.Y.
 \Large { Final project of Statistical Machine Learning (MAT0043)}
 \line(1,0){450}\\ 
 \vspace{0.4cm} 
-{ \huge \textbf{Gene selection for cancer type classification} }
+{ \huge \textbf{Genes selection for cancer type classification} }
 \vspace{0.1cm}
-%\hspace{0cm} 
-%Group: Bartoli Francesco,  Boetti Chiara (854411), Bordino Alberto (856592)
 \line(1,0){450} \\
 \end{center}
 
 %____________________________________________________________________________________________________________________________
 % ABSTRACT
-In recent years, medicine has made a great step forward in finding new and efficient therapies for different diseases. Thanks to up-to-date technologies, collecting huge amount of data is no longer an issue, so that one can exploit them to define personalised treatments for patients. In particular, cancer genome scale screens are just one example of these applications. In particular, they provide valuable information about the role of genes in driving cancer growth. Thus, researches has developed a Cancer Dependency Map in order to identify genetic and pharmacologic dependencies. However, this is quite a challenging aim: the dataset is not at all easy to handle (high-dimensional, over than $\sim 17.000$ features) and the picked drug-targetable genes should only rely on a specific cancer type, thus imbalanced classes. \\
-In this project, we apply cutting-edge Statistical Machine Learning algorithms to classify different cancer types and select the most relevant genes. After a quick exploratory analysis with PCA, we try Random Forest, Lasso-SVM and Neural Network classifiers and see how the same technique performs differently according to which tumour we are focusing on. In fact, our classification accuracies range from $45\%$ to $98\%$.  \textbf{Aggiungere altre conclusioni}
-\medskip
+From the DepMap Portal website \url{https://depmap.org/portal/} we downloaded a dataset containing 1032 cancerous cell lines whose $\sim 17000$ columns represent the probability that the inhibition of that given gene stops the growth of the cancer.  The label of each cell line refers to the cancer type and is a categorical factor which can assume 9 values: Gastrointestinal,  Gynecologic,  Musculoskeletal,  Neurological,  Breast,  Head-Neck,  Hematologic,  Genitourinary,  Lung.  The project then focuses on the problem of Genes Selection for Cancer Classification,  i.e.  finding a relatively small number of genes to predict the type of cancer of a given tumorous cell.  To this purpose we explored in details three Features Selection algorithms: Random Forests combined with Feature Importance,  Lasso-SVM and Neural Networks (NN) combined with Permutation Importance.  We repeated these procedures on three distinct classification tasks: blood cancer vs rest,  lung cancer vs rest and multiclass.  A part from the cases involving lung data,  we achieved satisfying classification accuracies on the whole dataset and we were able to select about 100-200 genes from the starting ~17000 ones.  We then fit the reduced versions of those classifier and obtained classification accuracies which range from $67\%$ to $98\%$.  We then concluded that the possibility of classifying the type of cancer from an extremely reduced numbers of genes depends on the cancer type itself.  In particular we observed that blood cancer is the one which separates the most from the other and indeed we achieved almost $100\%$ accuracy using only 100 genes while lung cancer is the worst behaved so this reduced classification task was unfeasible.  In the multiclass task we achieved good classification results with few variables as well and our suspects about lung and blood cancer were confirmed.  
 
-\begin{multicols}{2}
+
+
+
 \section{Introduction}
-%The mutations that cause cancer cells to grow also confer specific vulnerabilities that normal cells lack. Some of these acquired alterations represent compelling therapeutic targets. The challenge is that, for the overwhelming majority of cancers, we do not fully understand the relationship between the genetic alterations of cancer and the dependencies they cause. To solve this problem, we are creating a “cancer dependency map” by systematically identifying genetic dependencies and small molecule sensitivities and discovering the biomarkers that predict them.
-Scrivere che il cancro e' una malattia molto brutta e brevemente come funziona (aka le cellule impazziscono: svillupano mutazioni, diventano imprevedibile e causano problemi negli individui...). Il compito della medicina e' trovare delle cure (banana). E qua entra in gico DepMap: DNA arrays che raccolgono mutationi dei geni delle cellule cancerogene. \\
---------------- \\
-Developing new cancer therapies is based on finding processes that selectively kill cancer cells. In particular, the Achilles project uses genome-wide screens to systematically identify essential genes and report vulnerabilities across hundreds of human cancers.
+%The mutations that cause cancer cells to grow also confer specific vulnerabilities that normal cells lack. Some of these acquired alterations represent compelling therapeutic targets. The challenge is that, for the overwhelming majority of cancers, we do not fully understand the relationship between the genetic alterations of cancer and the dependencies they cause. To solve this problem, we are creating a “cancer dependency map” by systematically identifying genetic dependencies and small molecule sensitivities and discovering the biomarkers that predict them. Scrivere che il cancro e' una malattia molto brutta e brevemente come funziona (aka le cellule impazziscono: svillupano mutazioni, diventano imprevedibile e causano problemi negli individui...). Il compito della medicina e' trovare delle cure (banana). E qua entra in gico DepMap: DNA arrays che raccolgono mutationi dei geni delle cellule cancerogene. \\
+Cancer is the uncontrolled growth of abnormal cells anywhere in the body. These abnormal cells are termed cancer cells, malignant cells, or tumor cells.  These cells can  infiltrate normal body tissues. Many cancers and the abnormal cells that compose the cancer tissue are further identified by  the  name  of  the  tissue  that  the  abnormal  cells  originated  from  (for  example,  breast cancer, lung cancer and brain cancer).  When damaged or unrepaired cells do not die and become cancer cells and show uncontrolled division and growth - a mass of cancer cells develop. 
+In recent years, medicine has made a great step forward in finding new and efficient therapies for different diseases,  and cancer is one of them.  In particular,   thanks to numerous advances in technology,  collecting huge amount of data is no longer an issue,  so that one can exploit them to define personalized treatments for patients.  An example of this is the DepMap project and,  in particular,  the Achilles project whose aim is to collect data regarding mutations of cancerous cells using genome-wide screens,  identify essential genes and report vulnerabilities across hundreds of human cancers.  \\
+Many researches have been done using DepMap datasets and their goal was generally to identify a relatively small number of genes which are responsible for the cancer growth.  The choice of genes is often driven by medical knowledge,  which we do not possess,  together with some rough measure of importance.  Being Maths student we instead based our research only on statistical models and we hypothesized that important genes are the most important features for a given classifier,  where the meaning of "important" will be clarified later.  The implication of selecting a few truly important genes would have outstanding implications in the medical field.  It can be used for example to build faster diagnosis tools or to synthesize less toxic drugs which target a small number of specific genes. 
 
 \section{Dataset}
 We use two publicly available datasets, both found on the DepMap Portal website:
@@ -116,10 +114,7 @@ Figure \ref{fig:a} shows our classes.
 \section{Conclusion and future works}
 
 
-\end{multicols}
-
 \begin{thebibliography}{11}   % BIBLIOGRAFIA
-% \bibitem{Baum} L. Baum, T. Petrie, \textit{Statistical Inference for Probabilistic Functions of Finite State Markov Chains}, in Ann. Math. Stat., 37, 1554-1563, 1966 \\
 \bibitem{DepMap} DepMap Portal: \url{https://depmap.org/portal/}  \\
 \bibitem{DepMapData} DepMap, Broad (2021): DepMap 21Q3 Public, figshare. Dataset: \url{https://doi.org/10.6084/m9.figshare.15160110.v2} \\
 \bibitem{Achilles} Project Achilles: \url{https://depmap.org/portal/achilles/}  \\
