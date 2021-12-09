@@ -469,7 +469,7 @@ ggplot(plot.df, aes(x=primary_disease, fill=as.factor(label))) +
   scale_fill_discrete(name = "Primary disease")
 
 
-ggplot(trunc_df2_bis, aes(x = as.factor(CancerType))) +
+p = ggplot(trunc_df2_bis, aes(x = as.factor(CancerType))) +
   geom_bar(aes(fill = as.factor(label)), width = 0.55, 
            position = position_dodge(width = 0.75), show.legend = FALSE) +
     ggtitle("Cancers by Body Location/System") +
@@ -478,6 +478,8 @@ ggplot(trunc_df2_bis, aes(x = as.factor(CancerType))) +
           plot.title = element_text(hjust = 0.5)) +
     scale_x_discrete(labels = c("Eye", "Gastrointestinal", "Gynecologic", "Musculoskeletal",
                               "Neurologic", "Breast", "Head-Neck", "Hematologic",
-                              "Genitourinary", "Lung")) +
-  scale_fill_discrete(name = "Primary disease")
-  
+                              "Genitourinary", "Lung")) + 
+  scale_fill_discrete(name = "Primary disease") + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+                                                          panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+save_plot('plot.png', p)  
+library(cowplot)
