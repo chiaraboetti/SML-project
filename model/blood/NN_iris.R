@@ -49,5 +49,6 @@ predict <- function(data){
 predict(training_data)
 predict(test_data)
 
-importance = olden(nn)$data
+d = olden(nn)$data
+d[order(as.numeric(row.names(d))), ]
 write.csv(importance,'olden_multiclass.csv')
