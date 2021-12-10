@@ -31,7 +31,8 @@ def nn_model():
 
 sum_weight = 0
 
-for i in range(1):
+N = 1
+for i in range(N):
 
     # define the model
     rus = RandomUnderSampler(random_state=i)
@@ -44,7 +45,5 @@ for i in range(1):
     sum_weight += perm.feature_importances_
     print("done: " + str(i))
 
-avg_importance = pd.DataFrame(sorted(sum_weight/1, reverse=True))
-
-np.save('avg_importance', avg_importance) 
-imp_blood = np.load('avg_importance.npy')
+avg_importance = pd.DataFrame(sorted(sum_weight/N, reverse=True))
+np.save('blood_importance', avg_importance) 

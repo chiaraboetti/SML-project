@@ -95,18 +95,13 @@ def nn_model():
     model.add(Activation('softmax'))
 
     #categorical_crossentropy loss per classificazione (penalizza molto le previsioni che sono sbagliate ma con alta probabilità)
-    model.compile(optimizer = 'adam', metrics=['accuracy'], 
-     loss=[categorical_focal_loss(alpha=[.25, .25, .25, .25, .25, .25, .25, .25, .25], gamma=2)]) #ottimizzatore che usa stochastic gradient , errore assoluto medio
+    model.compile(optimizer = 'adam', metrics=['accuracy'], loss="categorical_crossentropy")
 
     return model
 
-sum_weight = 0
 my_model = KerasClassifier(build_fn=nn_model)    
 my_model.fit(X_train_reshaped,y_train)
 
 perm = PermutationImportance(my_model, random_state=3).fit(X_test_reshaped, y_test)
-sum_weight += perm.feature_importances_
-
-avg_importance = pd.DataFrame(sorted(sum_weight, reverse=True))
+avg_importance = pd.DataFrame(sorted(perm.feature_importances_, reverse=True))
 np.save('nn_multi_importance', avg_importance) 
-nn_importance = np.load('nn_multi_importance.npy')
