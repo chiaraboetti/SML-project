@@ -50,5 +50,6 @@ predict(training_data)
 predict(test_data)
 
 d = olden(nn)$data
-d[order(as.numeric(row.names(d))), ]
+
+rep(1000, 4) + d[order(as.numeric(row.names(d))), ]$importance
 write.csv(importance,'olden_multiclass.csv')
