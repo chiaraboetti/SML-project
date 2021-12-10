@@ -120,13 +120,15 @@ We decide to investigate two binary classification problems,  Blood vs Rest and 
 
 \section{Methods}
 \subsection{Random Forest}
-Whenever we are only interested in model performance and not in interpretability, Random Forest (RF) is a valid starting point, often used as "baseline" for benchmarking better methods. Being an ensemble of decision trees, a RF works by learning hierarchical if/else questions. It frequently performs well on imbalanced data and it is a good compromise when working with correlated high-dimensional data. Indeed, each decision tree classifiers of the RF is fitted only on a subset of the $p$ features, generally $\sqrt{p}$ of them, and averaging is used to improve predictive accuracy. \\
-Moreover, each tree in the RF learns from a random sample which is drawn with replacement and it can be shown that on average not all observation are used to fit the tree. These remaining observations are known as out-of-bag observation and are used to quickly estimate the generalization accuracy. \\
-Finally, RFs are a simple tool to detect the most important features. Prediction accuracy are first measured on the out-of-bag samples. Then, the values of the variable in the out-of-bag-sample are randomly shuffled, keeping all other variables the same. Finally, the decrease in prediction accuracy on the shuffled data is measured and the mean decrease in accuracy across all trees is reported. Intuitively, the random shuffling means that, on average, the shuffled variable has no predictive power. This importance is a measure of by how much removing a variable decreases accuracy, and vice versa — by how much including a variable increases accuracy. \\
-We hence selected the most important feature in two different ways:
+Whenever we are only interested in model performance and not in interpretability, Random Forest (RF) is a valid starting point. It frequently performs well on imbalanced data and it is a good compromise when working with correlated high-dimensional data. Furthermore, we can use Variable Importance of RFs to simply detect the most important features. This measure is calculated in three steps. First, prediction accuracy are measured on the out-of-bag samples. Then the values of the variable are randomly shuffled, keeping all other variables the same. Finally, the decrease in prediction accuracy on the shuffled data is measured and the mean decrease in accuracy across all trees is reported. Intuitively, the random shuffling means that, on average, the shuffled variable has no predictive power. This importance is a measure of by how much removing a variable decreases accuracy, and vice versa. \\
+We used this Variable Importance measure to select the most important feature in two different ways:
+%\begin{wrapfigure}{l}{0.3\textwidth}
+%	\includegraphics[width=0.3\textwidth]{Boruta-algo.jpg}\label{fig2}
+%\end{wrapfigure}
+
 \begin{itemize}
 	\item \textit{Cross-validation}. We perfomed a 5-fold cross-validation on the model, selected the top most important features of each model and finally averaged.
-	\item \textit{Boruta algorithm}: Boruta repeatedly measures feature importance then carries out statistical tests to screen out the features which are irrelevant. Here the steps:
+	\item \textit{Boruta algorithm}\footnote{\url{https://www.researchgate.net/publication/220443685_Boruta_-_A_System_for_Feature_Selection}}: Boruta repeatedly measures feature importance then carries out statistical tests to screen out the features which are irrelevant. Here the steps:
 	\begin{enumerate}
 	\item Create copies of all the original features present in your dataset.
 	\item Add randomness by shuffling these new feature. This is done to ensure that these new features show no correlation with the response variable.
@@ -138,6 +140,11 @@ We hence selected the most important feature in two different ways:
 
 
 \subsection{SVM-Lasso}
+Support vector machines (SVM) is based on the idea of finding a hyperplane that best separate classes. Here, we combine this method with a classical Lasso penalty, so that the objective function to be minimised is:
+\begin{equation*}
+	\dfrac{1}{n} \sum_{i=1}^n hingeLoss(y_i(x_i w + t)) + \lambda \sum_{j=1}^p |w_j|  \qquad	\text{where} \qquad  hingeLoss(z) = max\{0, 1-z\}
+\end{equation*}
+Thus, we obtain the usual sparsity in predictors: some $w$ are shrunken all the way to zero and the remaining are the few relevant features.
 
 \subsection{Neural Networks}
 Nowadays, Neural Networks are a very attractive approach to obtain excellent performances.
@@ -146,6 +153,9 @@ Nowadays, Neural Networks are a very attractive approach to obtain excellent per
 
 \section{Results}
 \subsection{Binary classifications}
+Before starting our Binary classifications on Blood and Lung cancer, we ran a Principal Component Analysis to gain some valuable insights. We noticed a surprising result: even if observations formed a cloud of points, Blood cancer cells were mainly concentrated in just one part of the 3-dimensional plot. The same did not happen for Lung cancer observations.
+
+We then moved to RF classifiers. 
 
 
 
