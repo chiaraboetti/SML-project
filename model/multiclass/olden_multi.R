@@ -4,19 +4,15 @@ library(nnet)
 library(NeuralNetTools)
 library(caret)
 
-multiclass = read_csv("../../dataset/multiclass_dataset_no_weird_obs.csv")
-multiclass = multiclass[, -c(1, 2)]
+multiclass = read_csv("../../dataset/multi_1.csv")
+data = multiclass[, -c(1, 2, 3)]
 
-set.seed(42)
-splitIndex = createDataPartition(multiclass$label, p=0.6, list=FALSE)
-data1 = multiclass[splitIndex,] 
-data2 = multiclass[-splitIndex,]
 
 # train whole NN
-set.seed(2311)
-splitIndex = createDataPartition(data1$label, p=0.75, list=FALSE)
-train = data1[splitIndex,] 
-test = data1[-splitIndex,]
+set.seed(42)
+splitIndex = createDataPartition(data$label, p=0.8, list=FALSE)
+train = data[splitIndex,] 
+test = data[-splitIndex,]
 
 train = cbind(train[,-c(17394)], class.ind(as.factor(train$label)))
 names(train) = c(names(train)[1:17393],"Gastrointestinal","Genitals","Muscle_Bone",
@@ -53,6 +49,7 @@ predict(test)
 
 importance = olden(nn)$data
 write.csv(importance,'olden_multiclass.csv')
+
 
 
 
