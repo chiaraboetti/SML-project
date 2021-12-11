@@ -22,22 +22,22 @@ f = as.formula(paste("IsBlood ~",
 
 importance = rep(0, 17393)
 blood_obs = train[train$IsBlood == 1, ]
-for (i in 1:10){
+for (i in 1:1){
   set.seed(i)
   no_blood_obs = sample_n(train[train$IsBlood == 0, ], 60)
-  df = rbind(blood_obs, no_blood)
+  df = rbind(blood_obs, no_blood_obs)
   df = df[sample(nrow(df)), ]
   
   nn_i = neuralnet(f,
                  data = df,
                  hidden = c(400, 300, 1),
-                 act.fct = "sigmoid",
+                 act.fct = "logistic",
                  linear.output = FALSE,
                  lifesign = "minimal")
   
-  d = olden(nn)$data
+  d = olden(nn_i)$data
   importance = importance + d[order(as.numeric(row.names(d))), ]$importance
 }
 
-write.csv(importance,'olden_multiclass.csv')
+write.csv(importance,'olden_blood.csv')
 
