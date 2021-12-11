@@ -7,7 +7,7 @@ library(knitr)
 library(smotefamily)
 #####################################################
 
-# load the dataset
+## Load the dataset
 blood = read.csv("dataset/blood_dataset.csv")
 
 index = which(blood$label == 1)
@@ -19,14 +19,13 @@ col.ind[index] = "red"
 blood.pca = blood %>%
   select(-c(X, DepMap_ID, label)) %>%
   prcomp()
-# 817 PCs (as expected). We hope that the first 20 PCs are enough to
-# obtain a proper classification
+# 1022 PCs (as expected). We hope that the first 20 PCs are enough to obtain a proper classification
 
 var_explained = blood.pca$sdev^2/sum(blood.pca$sdev^2)
 round(cumsum(var_explained[1:370]), 4)
 # The first 369 PCs provides the 75% of explained variance
 
-# look at the first 3 PCs
+# Look at the first 3 PCs
 screeplot(blood.pca, type = "lines", main = "Screeplot")
 
 as.data.frame(blood.pca$rotation[,1:3]) %>%
@@ -113,8 +112,7 @@ boxplot(blood.pca_bal$x[,1], main = "PC1", outpch = 16, outcol = col.ind_bal)
 boxplot(blood.pca_bal$x[,2], main = "PC2", outpch = 16, outcol = col.ind_bal)
 boxplot(blood.pca_bal$x[,3], main = "PC3", outpch = 16, outcol = col.ind_bal)
 
-# Still a cloud of points, but now blood-cancer obs are explained differently by
-# the PCs
+# Still a cloud of points, but now blood-cancer obs are explained differently by the PCs
 
 
 ## PCA for the filtered dataset
