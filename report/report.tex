@@ -73,44 +73,38 @@
 	\vspace{0.4cm} 
 	{ \huge \textbf{Gene selection for cancer type classification} }
 	\vspace{0.1cm}
-	%\hspace{0cm} 
-	%Group: Bartoli Francesco,  Boetti Chiara, Bordino Alberto (856592)
 	\line(1,0){450} \\
 \end{center}
 
 %____________________________________________________________________________________________________________________________
-% ABSTRACT
-%From the DepMap Portal website\footnote{DepMap Portal: \url{https://depmap.org/portal/} } we downloaded a dataset containing 1032 cancerous cells whose $\sim 17000$ columns represent the probability that the inhibition of that given gene stops the growth of the cancer.  The label of each cell line refers to the cancer type and is a categorical factor which can assume 10 values: Eye, Gastrointestinal,  Gynecologic,  Musculoskeletal,  Neurological,  Breast,  Head-Neck,  Hematologic,  Genitourinary,  Lung.  The project then focuses on the problem of Genes Selection for Cancer Classification,  i.e.  finding a relatively small number of genes to predict the type of cancer of a given tumorous cell.  To this aim we explored in detail three Features Selection algorithms: Random Forests combined with Feature Importance,  Lasso-SVM and Neural Networks (NN) combined with Permutation Importance.  We repeated these procedures on three distinct classification tasks: blood cancer vs rest,  lung cancer vs rest and multiclass.  Apart from the cases involving lung data,  we achieved satisfying classification accuracies on the whole dataset and we were able to select about 100-200 genes from the starting ~17000 ones.  We then used these features to fit reduced versions of the previous classifiers and obtained classification accuracies which range from $67\%$ to $98\%$.  We then concluded that the possibility of classifying the type of cancer from an extremely reduced numbers of genes depends on the cancer type itself.  In particular,  these methodologies worked incredibly well on blood cancer for which we achieved almost $100\%$ accuracy with the reduced classifier while failed miserably on lung cancer.  
 
 The purpose of our project is to work on a high-dimensional genomics data and find a relatively small number of genes to predict the cancer type of a given tumorous cells. This is known as Genes Selection for Cancer Classification and it is in line with many up-to-date problems of applied medicine. \\
-Our dataset contained $1.032$ cancerous cells and their knock-out probabilities, i.e. the probabilities of stopping the growth of tumour by inhibiting one of the $\sim 17.000$ genes. Each cell line was characterised by one of 10 possible cancer labels: Eye, Gastrointestinal, Gynecologic, Musculoskeletal, Neurological, Breast, Head-Neck, Hematologic, Genitourinary and, finally, Lung. We explored in details three Features Selection algorithms: Random Forests (RF) combined with Feature Importance, Lasso-SVM and Neural Networks (NN) combined with Permutation Importance. We studied two binary classifications (Blood-cancer vs. All, Lung-cancer vs. All) and a multiclass classification. Besides lung models, we achieved satisfying classification accuracies and we were able to select about $100$-$200$ genes from the initial $\sim 17.000$ ones. Models fitted on such genes obtained classification accuracies ranging from $67\%$ to $98\%$. \\
-Therefore, it seems that classifying cancer type from an extremely small set of genes depends on the cancer type itself. These methodologies worked incredibly well on Blood cancer, as we reached almost $100\%$ accuracy with the reduced classifier, whereas failed miserably on Lung cancer.  
+Our dataset contained $1.032$ cancerous cells and their knock-out probabilities, i.e. the probabilities of stopping the growth of tumor by inhibiting one of the $\sim 17.000$ genes. Each cell line was characterized by one of 10 possible cancer labels: Eye, Gastrointestinal, Gynecologic, Musculoskeletal, Neurological, Breast, Head-Neck, Hematologic, Genitourinary and, finally, Lung. We explored in details three Features Selection algorithms: Random Forests (RF) combined with Feature Importance, Lasso-SVM and Neural Networks (NN) combined with Olden Importance.  We studied two binary classification problems (Blood-cancer vs. All, Lung-cancer vs. All) and the multiclass problem. Besides lung models, we achieved satisfying classification accuracies and we were able to select about $100$-$200$ genes from the initial $\sim 17.000$ ones. Models fitted on such genes obtained classification accuracies ranging from $67\%$ to $98\%$. \\
+Therefore, it seems that classifying cancer type from an extremely small set of genes depends on the cancer type itself. These methodologies worked incredibly well on Blood cancer, as  we reached almost $100\%$ accuracy with the reduced classifier,  while failed miserably on Lung cancer.  
 
 
 \section{Introduction}
 Cancer is a complex disease characterized by the uncontrolled growth of abnormal cells anywhere in the body. These abnormal cells are extremely invasive and we usually identify them with the name of their original tissue (for instance, breast cancer, lung cancer,  brain cancer, etc.).  In recent years, medicine has made a great step forward in finding new and efficient therapies for different diseases and cancer is one of them.  In particular,  thanks to numerous advances in technology,  collecting huge amount of data is no longer an issue, so that one can exploit such information to define personalized treatments for patients. In this regards, the DepMap project\footnote{DepMap Portal: \url{https://depmap.org/portal/} } and,  in particular,  the Achilles project\footnote{Achilles Project: \url{https://depmap.org/portal/achilles/} } aim to use genome-wide screens to collect data regarding mutations of cancerous cells,  identify essential genes and report vulnerabilities across hundreds of human cancers.  \\
  
-Many researches are currently using DepMap datasets to identify relatively small sets of genes which are responsible of cancers growth. This procedure is often driven by medical knowledge,  which we do not possess,  together with some rough measures of importance.  Being Maths student,  we instead base our research on statistical models and on the hypothesis that, if a given classifier is able to distinguish different types of cancer, then the most relevant genes are the most important features for that given classifier (the meaning of "important features" will be clarified later). Of course, selecting few truly significant genes has outstanding implications in the medical field: building faster diagnosis tools and synthesising less toxic drugs are only two examples. 
+Many researches are currently using DepMap datasets to identify relatively small sets of genes which are responsible of cancers growth\footnote{Background material: \url{https://depmap.org/portal/publications/}}. This procedure is often driven by medical knowledge,  which we do not possess,  together with some rough measures of importance.  Being Maths student,  we instead base our research on statistical models and on the hypothesis that, if a given classifier is able to distinguish different types of cancer, then the most relevant genes are the most important features for that classifier (the meaning of "important features" will be clarified later).  Of course,  selecting few truly significant genes has outstanding implications in the medical field: building faster diagnosis tools and synthesizing less toxic drugs are only two examples. 
 
 
 \section{Dataset}
-We used two public datasets from the DepMap Portal website\footnote{Download dataset from DepMap:  \url{https://depmap.org/portal/download/}:} :
+We used two public datasets from the DepMap Public 21Q3 database,  released on August 2021\footnote{Download dataset from DepMap:  \url{https://depmap.org/portal/download/}}:
 \begin{itemize}
 	\item[D1] \textit{CRISPR\_gene\_dependency.csv},  which contains $1.032$ cancer cell lines characterised by $17.393$ gene scoring results
 	\item[D2] \textit{sample\_info.csv}, which contains cell lines information,  such as primary disease and sample collection site
 \end{itemize}
 Data were collected from real patients and successively processed,  so that element $(i, j)$ of this $(1.032 \times 17.393)$-data frame is the probability that knocking out gene $j$ has a real depletion effect on the $i$-th cell.
 Before proceeding with our analysis, we removed missing values, which affected only 10 rows coming from different tumours, and we looked for weird observation. In particular, we found $2$ "Non-Cancerous" and $6$ "Engineered" cells. The first can be reasonably discarded, whereas the latter requires a little care. Engineered cells are synthetically modified samples in lab and, here, they are manly associated to the Eye sample collection site. We decided to keep them and associate them to the cancer corresponding to their site. \\
-Side note: in general, looking also at the sample collection site do not ease tumour classification. Indeed, metastasis of the original compromised tissue can be found all over the body. \\
-%  In order to work on a labelled datasets and perform classification, we associated the primary disease (i.e. the name of the cancer type) to each cell line performing an inner join of D1 and D2 on the DepMap ID.  Then,  we dedicated ourselves in data cleaning: we removed missing values,  which affected only 10 rows,  and all instances labeled as "Non Cancerous" and "Engineered".  
 
 \begin{wrapfigure}{r}{0.65\textwidth}
 	\includegraphics[width=0.65\textwidth]{plot1.png}
 	\captionof{figure}{Cancer classes}\label{fig1}
 \end{wrapfigure}
 
-We hence grouped the various cancer types in 10 classes according to common medical knowledge\footnote{Cancer types grouped by body location: \url{https://www.cancer.gov/types/by-body-location}} and we obtained classes as reported in Figure \ref{fig1}.  "Eye" is the smallest one as there are only $16$ observations, $5$ of which labelled as "Enginereed". On the other hand, "Gastrointestinal" is the largest group and it comprehends $7$ types of cancer,  making this group quite heterogeneous.
-We decide to investigate two binary classification problems,  Blood vs Rest and Lung vs Rest, and the multiclass problem. We chose Lung because of the nature of such class: it is the most numerous group composed only by Lung cancer samples. The choice of Blood was instead driven by some underlying biological knowledge. In fact,  Blood cancer is quite different from other tumours because
+We  grouped the various cancer types in 10 classes according to common medical knowledge\footnote{Cancer types grouped by body location: \url{https://www.cancer.gov/types/by-body-location}} and we obtained classes as reported in Figure \ref{fig1}.  "Eye" is the smallest one as there are only $16$ observations, $5$ of which labelled as "Enginereed". On the other hand, "Gastrointestinal" is the largest group and it comprehends $7$ types of cancer,  making this group quite heterogeneous.
+We decide to investigate two binary classification problems,  Blood vs Rest and Lung vs Rest, and the multiclass problem. We chose Lung because of the nature of such a class: it is the most numerous group composed only by Lung cancer samples. The choice of Blood was instead driven by some underlying biological knowledge. In fact,  Blood cancer is quite different from other tumours because
 \begin{itemize}
 	\item blood is in the whole body
 	\item Leukemia, Lymphom and Myeloma are the main kinds of cancer but they all affect white blood cells
@@ -128,7 +122,7 @@ We used this Variable Importance measure to select the most important feature in
 
 \begin{itemize}
 	\item \textit{Cross-validation}. We perfomed a 5-fold cross-validation on the model, selected the top most important features of each model and finally averaged.
-	\item \textit{Boruta algorithm}\footnote{\url{https://www.researchgate.net/publication/220443685_Boruta_-_A_System_for_Feature_Selection}}: Boruta repeatedly measures feature importance then carries out statistical tests to screen out the features which are irrelevant. Here the steps:
+	\item \textit{Boruta algorithm}\footnote{Boruta: \url{https://www.researchgate.net/publication/220443685_Boruta_-_A_System_for_Feature_Selection}}: Boruta repeatedly measures feature importance then carries out statistical tests to screen out the features which are irrelevant. Here the steps:
 	\begin{enumerate}
 	\item Create copies of all the original features present in your dataset.
 	\item Add randomness by shuffling these new feature. This is done to ensure that these new features show no correlation with the response variable.
@@ -140,14 +134,14 @@ We used this Variable Importance measure to select the most important feature in
 
 
 \subsection{SVM-Lasso}
-Support vector machines (SVM) is based on the idea of finding a hyperplane that best separate classes. Here, we combine this method with a classical Lasso penalty, so that the objective function to be minimised is:
+Support vector machines (SVM) are based on the idea of finding a hyperplane that best separate classes. Here, we combine this method with the classical Lasso penalty,  so that the objective function to be minimized is:
 \begin{equation*}
 	\dfrac{1}{n} \sum_{i=1}^n hingeLoss(y_i(x_i w + t)) + \lambda \sum_{j=1}^p |w_j|  \qquad	\text{where} \qquad  hingeLoss(z) = max\{0, 1-z\}
 \end{equation*}
-Thus, we obtain the usual sparsity in predictors: some $w$ are shrunken all the way to zero and the remaining are the few relevant features.
+where the parameter $\lambda$ is chosen via cross-validation.  We then obtain the sparsity in predictors: some $w_i$ are shrunken all the way to zero while the ones that are not will be used to identify the important features. 
 
 \subsection{Neural Networks}
-Nowadays, Neural Networks are a very attractive approach to obtain excellent performances.
+Neural Networks (NN) are efficient models to capture non-linear relationship between the predictors and the target variables.  In this context we trained NN with two hidden layers of width 400 and 300 respectively using as activation function the \textit{ReLU} for the hidden layer and the \textit{sigmoid} in the binary classification problem and the \textit{softmax} in the multiclass one for the output layer.  Furthermore,  being the binary classification problems a little unbalanced,  a part from the usual \textit{Cross Entropy} loss function we also used the \textit{Focal Loss}, which is defined as $$ FL(z) = \alpha \cdot (1 - z)^{\gamma} \log{z} \text{,  for      }z \in [0,1]  \text{,  for     }  \alpha,  \gamma \geq 0$$ in order to focus learning on hard negative examples.  Note that \textit{Focal Loss} can be extended and used in mutliclass classification tasks as well\footnote{Focal Loss: \url{https://arxiv.org/pdf/1708.02002.pdf}}.  Once this NNs were fitted,  we ranked the variable according to the Olden Importance measure\footnote{Olden Importance: \url{https://depts.washington.edu/oldenlab/wordpress/wp-content/uploads/2013/03/EcologicalModelling_2004.pdf}}, selected the first 120 and used them to construct a reduced version of the classifier.
 
 
 
@@ -167,5 +161,4 @@ We then moved to RF classifiers.
 \section{Conclusion and future works}
 
 
-%\end{multicols}
 \end{document}
