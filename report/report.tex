@@ -113,8 +113,15 @@ We decide to investigate two binary classification problems,  Blood vs Rest and 
 
 
 \section{Methods}
+This section deals with a brief explanation of the algorithms we used.  Each procedure is characterized by three steps:
+\begin{enumerate}
+\item fit the model using all the features
+\item identify the most important ones based on some measure of importance
+\item use these genes to fit a reduced version of the classifier and see how it performs
+\end{enumerate}
+
 \subsection{Random Forest}
-Whenever we are only interested in model performance and not in interpretability, Random Forest (RF) is a valid starting point. It frequently performs well on imbalanced data and it is a good compromise when working with correlated high-dimensional data. Furthermore, we can use Variable Importance of RFs to simply detect the most important features. This measure is calculated in three steps. First, prediction accuracy are measured on the out-of-bag samples. Then the values of the variable are randomly shuffled, keeping all other variables the same. Finally, the decrease in prediction accuracy on the shuffled data is measured and the mean decrease in accuracy across all trees is reported. Intuitively, the random shuffling means that, on average, the shuffled variable has no predictive power. This importance is a measure of by how much removing a variable decreases accuracy, and vice versa. \\
+We started by fitting Random Forest (RF) models as they frequently performs well on imbalanced data and correlated high-dimensional data.  Once the model had been fitted,  we used Variable Importance of RFs to identify the most important features. This measure is calculated in three steps.  First, prediction accuracy are measured on the out-of-bag samples. Then the values of the variable are randomly shuffled, keeping all other variables the same. Finally, the decrease in prediction accuracy on the shuffled data is measured and the mean decrease in accuracy across all trees is reported. Intuitively, the random shuffling means that, on average, the shuffled variable has no predictive power. This importance is a measure of by how much removing a variable decreases accuracy, and vice versa. \\
 We used this Variable Importance measure to select the most important feature in two different ways:
 %\begin{wrapfigure}{l}{0.3\textwidth}
 %	\includegraphics[width=0.3\textwidth]{Boruta-algo.jpg}\label{fig2}
@@ -122,15 +129,8 @@ We used this Variable Importance measure to select the most important feature in
 
 \begin{itemize}
 	\item \textit{Cross-validation}. We perfomed a 5-fold cross-validation on the model, selected the top most important features of each model and finally averaged.
-	\item \textit{Boruta algorithm}\footnote{Boruta: \url{https://www.researchgate.net/publication/220443685_Boruta_-_A_System_for_Feature_Selection}}: Boruta repeatedly measures feature importance then carries out statistical tests to screen out the features which are irrelevant. Here the steps:
-	\begin{enumerate}
-	\item Create copies of all the original features present in your dataset.
-	\item Add randomness by shuffling these new feature. This is done to ensure that these new features show no correlation with the response variable.
-	\item Run random forest classifier on the extended dataset and generate feature importance score based on mean accuracy decrease estimate for all the shadow variables.
-	\item Compare Z-score of original variable with the maximum Z-score of shadow variables. Real features that have low score compared to the best of shadow features are deemed unimportant.
-	\item Remove shadow features and repeat the process until an importance score is generated for all the variables.
-	\end{enumerate}
-\end{itemize}
+	\item \textit{Boruta algorithm}\footnote{Boruta: \url{https://www.researchgate.net/publication/220443685_Boruta_-_A_System_for_Feature_Selection}}: Boruta repeatedly measures feature importance then carries out statistical tests to screen out the features which are irrelevant. 
+\end{itemize} 
 
 
 \subsection{SVM-Lasso}
@@ -141,7 +141,7 @@ Support vector machines (SVM) are based on the idea of finding a hyperplane that
 where the parameter $\lambda$ is chosen via cross-validation.  We then obtain the sparsity in predictors: some $w_i$ are shrunken all the way to zero while the ones that are not will be used to identify the important features. 
 
 \subsection{Neural Networks}
-Neural Networks (NN) are efficient models to capture non-linear relationship between the predictors and the target variables.  In this context we trained NN with two hidden layers of width 400 and 300 respectively using as activation function the \textit{ReLU} for the hidden layer and the \textit{sigmoid} in the binary classification problem and the \textit{softmax} in the multiclass one for the output layer.  Furthermore,  being the binary classification problems a little unbalanced,  a part from the usual \textit{Cross Entropy} loss function we also used the \textit{Focal Loss}, which is defined as $$ FL(z) = \alpha \cdot (1 - z)^{\gamma} \log{z} \text{,  for      }z \in [0,1]  \text{,  for     }  \alpha,  \gamma \geq 0$$ in order to focus learning on hard negative examples.  Note that \textit{Focal Loss} can be extended and used in mutliclass classification tasks as well\footnote{Focal Loss: \url{https://arxiv.org/pdf/1708.02002.pdf}}.  Once this NNs were fitted,  we ranked the variable according to the Olden Importance measure\footnote{Olden Importance: \url{https://depts.washington.edu/oldenlab/wordpress/wp-content/uploads/2013/03/EcologicalModelling_2004.pdf}}, selected the first 120 and used them to construct a reduced version of the classifier.
+Neural Networks (NN) are efficient models to capture non-linear relationship between the predictors and the target variables.  In this context we trained NN with two hidden layers of width 400 and 300 respectively using  the \textit{ReLU} function as activation  for the hidden layer and the \textit{sigmoid} in the binary classification problem and the \textit{softmax} in the multiclass one for the output layer.  Furthermore,  being the binary classification problems a little unbalanced,  a part from the usual \textit{Cross Entropy} loss function we also used the \textit{Focal Loss}, which is defined as $$ FL(z) = \alpha \cdot (1 - z)^{\gamma} \log{z} \text{,  \hspace{3pt} with }z \in [0,1]  \text{ and } \alpha,  \gamma \geq 0$$ in order to focus learning on hard negative examples.  Note that \textit{Focal Loss} can be extended and used in mutliclass classification tasks as well\footnote{Focal Loss: \url{https://arxiv.org/pdf/1708.02002.pdf}}.  Once this NNs were fitted,  we ranked the variable according to the Olden Importance measure\footnote{Olden Importance: \url{https://depts.washington.edu/oldenlab/wordpress/wp-content/uploads/2013/03/EcologicalModelling_2004.pdf}}, selected the first 120 and used them to construct a reduced version of the classifier.
 
 
 
@@ -159,6 +159,11 @@ We then moved to RF classifiers.
 
 
 \section{Conclusion and future works}
+\begin{itemize}
+\item reiterate key findings
+\item limitations: data high correlated,  no medical knowledge,  no meaning at selected genes
+\item suggest for the future: work with a med student,  try other classes or methods,  improve lung in some way
+\end{itemize}
 
 
 \end{document}
