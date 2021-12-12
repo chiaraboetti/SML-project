@@ -1,10 +1,15 @@
 # Gene selection for cancer classification
-Final project of SML course a.y. 2021-2022 at Stochastic and Data Science (UniTo).  Project due to Friday, December 17 (6pm) and review received on Monday, December 20 and due by Tuesday, December 21 (midnight).
-The goal is to solve a real problem with a family of algorithms studied in class (or a new one).
+Final project of SML course a.y. 2021-2022 at Stochastic and Data Science (UniTo).  Project due to Friday, December 17 (6pm).
+
+![image](https://www.ebi.ac.uk/sites/ebi.ac.uk/files/groups/external_relations/images/wide-imagery/Drug-Discovery-LEACH_Andrew_2020_780x400.jpg)
 
 ## The problem
-In this work, we applied machine learning algorithms to find the optimal set to classify cancer types with raw data. The hypothesis is that each cancer type has a set of genes representing the whole growth phenotype of such specific cancer.
-Our primary goal is to identify a minimal feature (gene) set that still achieves reasonable classification of cancer type, so that feature selection is the key problem in this project.
+The task is Gene Selection for Cancer Classification, i.e. finding a reasonably low number of important genes and use them to classify the type of cancer. To this aim, three learning algorithms were used:
+- Random Forests
+- SVM-Lasso
+- Feed Forward Neural Networks
+
+In SVM-Lasso, important features are considered to be the ones which have a non-zero weight. In the other two cases, important genes were selected after fitting the global model and using spefic procedures of Variable Importance such as Permutation Imprtance and Olden Importance.
 
 ## Datasets
 Data files can be found on the Depmap website.  This project aims to create  “cancer dependency map” by systematically identifying genetic dependencies and small molecule sensitivities and discovering the biomarkers that predict them.
