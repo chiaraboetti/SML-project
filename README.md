@@ -1,6 +1,8 @@
 # Gene selection for cancer classification
 Final project of SML course a.y. 2021-2022 at Stochastic and Data Science (UniTo).  Project due to Friday, December 17 (6pm).
 
+![image](https://www.ebi.ac.uk/sites/ebi.ac.uk/files/groups/external_relations/images/wide-imagery/Drug-Discovery-LEACH_Andrew_2020_780x400.jpg)
+
 ## The problem
 The task is Gene Selection for Cancer Classification, i.e. finding a reasonably low number of important genes and use them to classify the type of cancer. To this aim, three learning algorithms were used:
 - Random Forests
