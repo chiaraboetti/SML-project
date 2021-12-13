@@ -119,6 +119,7 @@ This section deals with a brief explanation of the algorithms we used.  Each pro
 \item identify the most important ones based on some measure of importance
 \item use these genes to fit a reduced version of the classifier and see how it performs
 \end{enumerate}
+Clearly,  each procedure involves fitting a model twice,  the all-features version and the reduced version.  Since the latter depends on the former through the selection of the important features it uses,  we were forced to split the dataset into two smaller chunks and to use the first one for point 1 and the second one for point 3.  This is crucial as it ensures the independence of the two models and removes any sort of correlation. 
 
 \subsection{Random Forest}
 We started by fitting Random Forest (RF) models as they frequently performs well on imbalanced data and correlated high-dimensional data.  Once the model had been fitted,  we used Variable Importance of RFs to identify the most important features. This measure is calculated in three steps.  First, prediction accuracy are measured on the out-of-bag samples. Then the values of the variable are randomly shuffled, keeping all other variables the same. Finally, the decrease in prediction accuracy on the shuffled data is measured and the mean decrease in accuracy across all trees is reported. Intuitively, the random shuffling means that, on average, the shuffled variable has no predictive power. This importance is a measure of by how much removing a variable decreases accuracy, and vice versa. \\
@@ -147,9 +148,21 @@ Neural Networks (NN) are efficient models to capture non-linear relationship bet
 
 \section{Results}
 \subsection{Binary classifications}
+
+%PCA
 Before starting our Binary classifications on Blood and Lung cancer, we ran a Principal Component Analysis to gain some valuable insights. We noticed a surprising result: even if observations formed a cloud of points, Blood cancer cells were mainly concentrated in just one part of the 3-dimensional plot. The same did not happen for Lung cancer observations.
 
-We then moved to RF classifiers. 
+%RF
+We then moved to RF classifiers.  %scrivi la tua parte
+
+%SVM
+
+
+%NN
+As for the implementation of NNs,  we firstly fit a single 
+
+
+
 
 \begin{table}[ht]
 \caption{Average recall of the models fitted with all the features}
