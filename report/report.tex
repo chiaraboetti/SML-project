@@ -151,6 +151,50 @@ Before starting our Binary classifications on Blood and Lung cancer, we ran a Pr
 
 We then moved to RF classifiers. 
 
+\begin{table}[ht]
+\caption{Average recall of the models fitted with all the features}
+\centering
+\begin{tabular}{c c c c}
+\hline\hline
+Task & RF & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
+\hline
+Blood & 50 & 837 & 970 \\
+Lung &47 & 877 & 230 \\
+Multiclass & 45 & 300 & 556 \\ [1ex]
+\hline
+\end{tabular}
+\label{table:big_models}
+\end{table}
+
+\begin{table}[ht]
+\caption{Selected variables}
+\centering
+\begin{tabular}{c c c c c}
+\hline\hline
+Task & RF & Boruta & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
+\hline
+Blood & 50 &837 & 23 & 970 \\
+Lung &47 & 877 & 44 & 230 \\
+Multiclass & 45 &  44 & 300 & 556 \\ [1ex]
+\hline
+\end{tabular}
+\label{table:selected variables}
+\end{table}
+
+\begin{table}[ht]
+\caption{Average recall of reduced models}
+\centering
+\begin{tabular}{c c c c}
+\hline\hline
+Task & RF & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
+\hline
+Blood & 50 &837 & 970 \\
+Multiclass & 45 &  44 & 300 \\ [1ex]
+\hline
+\end{tabular}
+\label{table:reduced_models}
+\end{table}
+
 
 
 
