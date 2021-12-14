@@ -1,10 +1,10 @@
 \documentclass[a4paper,11pt, oneside]{article}  % document class
 \usepackage{geometry}
 \geometry{
-  inner=20mm,
-  outer=20mm,
-  top=27mm,
-  bottom=25mm %
+inner=20mm,
+outer=18mm,
+top=25mm,
+bottom=25mm %
 %  heightrounded,
 %  marginparwidth=50pt,
 %  marginparsep=17pt,
@@ -22,10 +22,10 @@
 \usepackage{pifont}
 \usepackage{url}
 \hypersetup{
-	colorlinks=true,
-	linkcolor=blue,
-	filecolor=magenta,      
-	urlcolor=blue
+colorlinks=true,
+linkcolor=blue,
+filecolor=magenta,      
+urlcolor=blue
 }
 \usepackage{graphicx, color, blindtext}
 \usepackage{textcomp, makeidx, times}
@@ -85,127 +85,140 @@ Therefore, it seems that classifying cancer type from an extremely small set of 
 
 \section{Introduction}
 Cancer is a complex disease characterized by the uncontrolled growth of abnormal cells anywhere in the body. These abnormal cells are extremely invasive and we usually identify them with the name of their original tissue (for instance, breast cancer, lung cancer,  brain cancer, etc.).  In recent years, medicine has made a great step forward in finding new and efficient therapies for different diseases and cancer is one of them.  In particular,  thanks to numerous advances in technology,  collecting huge amount of data is no longer an issue, so that one can exploit such information to define personalized treatments for patients. In this regards, the DepMap project\footnote{DepMap Portal: \url{https://depmap.org/portal/} } and,  in particular,  the Achilles project\footnote{Achilles Project: \url{https://depmap.org/portal/achilles/} } aim to use genome-wide screens to collect data regarding mutations of cancerous cells,  identify essential genes and report vulnerabilities across hundreds of human cancers.  \\
- 
+
 Many researches are currently using DepMap datasets to identify relatively small sets of genes which are responsible of cancers growth\footnote{Background material: \url{https://depmap.org/portal/publications/}}. This procedure is often driven by medical knowledge,  which we do not possess,  together with some rough measures of importance.  Being Maths student,  we instead base our research on statistical models and on the hypothesis that, if a given classifier is able to distinguish different types of cancer, then the most relevant genes are the most important features for that classifier (the meaning of "important features" will be clarified later).  Of course,  selecting few truly significant genes has outstanding implications in the medical field: building faster diagnosis tools and synthesizing less toxic drugs are only two examples. 
 
 
 \section{Dataset}
 We used two public datasets from the DepMap Public 21Q3 database,  released on August 2021\footnote{Download dataset from DepMap:  \url{https://depmap.org/portal/download/}}:
 \begin{itemize}
-	\item[D1] \textit{CRISPR\_gene\_dependency.csv},  which contains $1.032$ cancer cell lines characterised by $17.393$ gene scoring results
-	\item[D2] \textit{sample\_info.csv}, which contains cell lines information,  such as primary disease and sample collection site
+	\item[D1] \textit{CRISPR\_gene\_dependency.csv},  which contains $1.032$ cancer cells and their $17.393$ gene scoring results;
+	\item[D2] \textit{sample\_info.csv}, which contains cell lines information,  such as primary disease and sample collection site.
 \end{itemize}
-Data were collected from real patients and successively processed,  so that element $(i, j)$ of this $(1.032 \times 17.393)$-data frame is the probability that knocking out gene $j$ has a real depletion effect on the $i$-th cell.
-Before proceeding with our analysis, we removed missing values, which affected only 10 rows coming from different tumours, and we looked for weird observation. In particular, we found $2$ "Non-Cancerous" and $6$ "Engineered" cells. The first can be reasonably discarded, whereas the latter requires a little care. Engineered cells are synthetically modified samples in lab and, here, they are manly associated to the Eye sample collection site. We decided to keep them and associate them to the cancer corresponding to their site. \\
+Data were collected from real patients and successively processed,  so that element $(i, j)$ of this $(1.032 \times 17.393)$-data frame is the probability that "knocking out gene $j$ has a real depletion effect on the $i$-th cell".
+Before proceeding with our analysis, we removed missing values, which affected only 10 rows coming from different tumours. Regarding weird observations, we found $2$ "Non-Cancerous" and $6$ "Engineered" cells. The first can be reasonably discarded, whereas the latter requires a little care. Engineered cells are synthetically modified samples in lab and, here, they are manly associated to the Eye sample collection site. We decided to keep them and associate them to the cancer corresponding to their site. 
 
 \begin{wrapfigure}{r}{0.65\textwidth}
 	\includegraphics[width=0.65\textwidth]{plot1.png}
 	\captionof{figure}{Cancer classes}\label{fig1}
 \end{wrapfigure}
-
-We  grouped the various cancer types in 10 classes according to common medical knowledge\footnote{Cancer types grouped by body location: \url{https://www.cancer.gov/types/by-body-location}} and we obtained classes as reported in Figure \ref{fig1}.  "Eye" is the smallest one as there are only $16$ observations, $5$ of which labelled as "Enginereed". On the other hand, "Gastrointestinal" is the largest group and it comprehends $7$ types of cancer,  making this group quite heterogeneous.
-We decide to investigate two binary classification problems,  Blood vs Rest and Lung vs Rest, and the multiclass problem. We chose Lung because of the nature of such a class: it is the most numerous group composed only by Lung cancer samples. The choice of Blood was instead driven by some underlying biological knowledge. In fact,  Blood cancer is quite different from other tumours because
+We grouped the various cancer types in 10 classes according to common medical knowledge\footnote{Cancer types grouped by body location: \url{https://www.cancer.gov/types/by-body-location}} and we obtained classes as reported in Figure \ref{fig1}.  "Eye" was the smallest one as there were only $16$ observations, $5$ of which labelled as "Enginereed". On the other hand, "Gastrointestinal" was the largest group and it comprehended $7$ types of cancer,  making this group quite heterogeneous. \\
+We investigated two binary classification problems, Blood vs Rest and Lung vs Rest, and the multiclass problem. We chose "Lung" because of the nature of such a class: it was the most numerous group composed only by Lung cancer samples. The choice of "Blood" was instead driven by some underlying biological knowledge: Blood cancer is quite different from other tumours because
 \begin{itemize}
-	\item blood is in the whole body
-	\item Leukemia, Lymphom and Myeloma are the main kinds of cancer but they all affect white blood cells
-	\item not all blood cancers require a treatment, just periodical monitoring
+	\item blood is in the whole body, and so the cancer is, too;
+	\item Leukemia, Lymphom and Myeloma are the main kinds of cancer but they all affect white blood cells;
+	\item not all blood cancers require a treatment, just periodical monitoring.
 \end{itemize} 
 
 
 \section{Methods}
-This section deals with a brief explanation of the algorithms we used.  Each procedure is characterized by three steps:
+Let us briefly illustrate the algorithms we used. Our methodology was characterized by three steps:
 \begin{enumerate}
-\item fit the model using all the features
-\item identify the most important ones based on some measure of importance
-\item use these genes to fit a reduced version of the classifier and see how it performs
+	\item fit the model using all the features;
+	\item identify the most important variables based on some measure of importance;
+	\item use these genes to fit a reduced version of the classifier and find out its performance.
 \end{enumerate}
-Clearly,  each procedure involves fitting a model twice,  the all-features version and the reduced version.  Since the latter depends on the former through the selection of the important features it uses,  we were forced to split the dataset into two smaller chunks and to use the first one for point 1 and the second one for point 3.  This is crucial as it ensures the independence of the two models and removes any sort of correlation. 
+Clearly. each procedure involved fitting a model twice: the all-features version and the reduced one. We were thus forced to split the dataset into two further chunks. This was crucial to ensure independence of the two models and remove any sort of correlation.
 
 \subsection{Random Forest}
-We started by fitting Random Forest (RF) models as they frequently performs well on imbalanced data and correlated high-dimensional data.  Once the model had been fitted,  we used Variable Importance of RFs to identify the most important features. This measure is calculated in three steps.  First, prediction accuracy are measured on the out-of-bag samples. Then the values of the variable are randomly shuffled, keeping all other variables the same. Finally, the decrease in prediction accuracy on the shuffled data is measured and the mean decrease in accuracy across all trees is reported. Intuitively, the random shuffling means that, on average, the shuffled variable has no predictive power. This importance is a measure of by how much removing a variable decreases accuracy, and vice versa. \\
-We used this Variable Importance measure to select the most important feature in two different ways:
-%\begin{wrapfigure}{l}{0.3\textwidth}
-%	\includegraphics[width=0.3\textwidth]{Boruta-algo.jpg}\label{fig2}
-%\end{wrapfigure}
+We started by fitting Random Forest (RF) models as they frequently performs well on imbalanced and correlated high-dimensional data.  Once the model had been fitted,  we used Variable Importance of RFs to identify the most important features. This measure is calculated in three steps. First, prediction accuracy are measured on the out-of-bag samples. Then, the values of the variable are randomly shuffled, keeping all other variables the same. Finally, the decrease in prediction accuracy on the shuffled data is measured and the mean decrease in accuracy across all trees is reported. 
 
+\begin{wrapfigure}{l}{0.27\textwidth}
+	\includegraphics[width=0.27\textwidth]{Boruta-Algorithm.jpg}
+	\captionof{figure}{Boruta algorithm}\label{fig2}
+\end{wrapfigure}
+Intuitively, the random shuffling means that, on average, the shuffled variable has no predictive power. \\
+Hence, Variable Importance measures how much accuracy decreases because of removing a variable. Here, we used it to select the most important feature in two different ways:
 \begin{itemize}
-	\item \textit{Cross-validation}. We perfomed a 5-fold cross-validation on the model, selected the top most important features of each model and finally averaged.
-	\item \textit{Boruta algorithm}\footnote{Boruta: \url{https://www.researchgate.net/publication/220443685_Boruta_-_A_System_for_Feature_Selection}}: Boruta repeatedly measures feature importance then carries out statistical tests to screen out the features which are irrelevant. 
+	\item \textit{Cross-validation}: we performed a 5-fold Cross-validation on the model and selected the top most important features of each model; % and finally averaged;
+	\item \textit{Boruta algorithm}\footnote{Boruta algorithm: \url{https://www.researchgate.net/publication/220443685_Boruta_-_A_System_for_Feature_Selection}}: Boruta repeatedly measures feature importance then carries out statistical tests to screen out the features which are irrelevant. The procedure terminates when all features are either decisively relevant or decisively irrelevant. Simple scheme is drawn in Figure \ref{fig2}. 
 \end{itemize} 
 
 
 \subsection{SVM-Lasso}
-Support vector machines (SVM) are based on the idea of finding a hyperplane that best separate classes. Here, we combine this method with the classical Lasso penalty,  so that the objective function to be minimized is:
+Support vector machines (SVM) are based on the idea of finding a hyperplane that best separate classes. Here, we combined this method with the classical Lasso penalty, so that the objective function to be minimized was:
 \begin{equation*}
-	\dfrac{1}{n} \sum_{i=1}^n hingeLoss(y_i(x_i w + t)) + \lambda \sum_{j=1}^p |w_j|  \qquad	\text{where} \qquad  hingeLoss(z) = max\{0, 1-z\}
+\dfrac{1}{n} \sum_{i=1}^n hingeLoss(y_i(x_i w + t)) + \lambda ||w||_1  \qquad	\text{where} \qquad  hingeLoss(z) = max\{0, 1-z\}
 \end{equation*}
-where the parameter $\lambda$ is chosen via cross-validation.  We then obtain the sparsity in predictors: some $w_i$ are shrunken all the way to zero while the ones that are not will be used to identify the important features. 
+The parameter $\lambda$ has been chosen via cross-validation. Thanks to Lasso penalty, we obtained parsity in predictors: some $w_i$ are shrunken all the way to zero, whereas the others identified important features. 
 
 \subsection{Neural Networks}
-Neural Networks (NN) are efficient models to capture non-linear relationship between the predictors and the target variables.  In this context we trained NN with two hidden layers of width 400 and 300 respectively using  the \textit{ReLU} function as activation  for the hidden layer and the \textit{sigmoid} in the binary classification problem and the \textit{softmax} in the multiclass one for the output layer.  Furthermore,  being the binary classification problems a little unbalanced,  a part from the usual \textit{Cross Entropy} loss function we also used the \textit{Focal Loss}, which is defined as $$ FL(z) = \alpha \cdot (1 - z)^{\gamma} \log{z} \text{,  \hspace{3pt} with }z \in [0,1]  \text{ and } \alpha,  \gamma \geq 0$$ in order to focus learning on hard negative examples.  Note that \textit{Focal Loss} can be extended and used in mutliclass classification tasks as well\footnote{Focal Loss: \url{https://arxiv.org/pdf/1708.02002.pdf}}.  Once this NNs were fitted,  we ranked the variable according to the Olden Importance measure\footnote{Olden Importance: \url{https://depts.washington.edu/oldenlab/wordpress/wp-content/uploads/2013/03/EcologicalModelling_2004.pdf}}, selected the first 120 and used them to construct a reduced version of the classifier.
+Neural Networks (NN) are efficient models to capture non-linear relationship between predictors and target variables. In this context, we trained NN with two hidden layers of width 400 and 300 respectively and we chose \textit{ReLU} as activation function for the hidden layer, \textit{sigmoid} and \textit{softmax} for the output layer of, respectively, binary and multiclass classifications. \\
+Given that the binary problems were a little unbalanced, we tried both the usual \textit{Cross Entropy} loss function and the \textit{Focal Loss}, defined as 
+\begin{equation*}
+	FL(z) = \alpha \cdot (1 - z)^{\gamma} \log{z} \text{,  \hspace{3pt} with }z \in [0,1]  \text{ and } \alpha,  \gamma \geq 0
+\end{equation*}
 
-
+Note that \textit{Focal Loss} can be extended for dealing with multiclass classification tasks\footnote{Focal Loss: \url{https://arxiv.org/pdf/1708.02002.pdf}}. \\
+Once our NNs were fitted,  we ranked variables according to the Olden Importance measure\footnote{Olden Importance: \url{https://depts.washington.edu/oldenlab/wordpress/wp-content/uploads/2013/03/EcologicalModelling_2004.pdf}}, selected the first ones and trained a reduced version of the classifier on them.
 
 \section{Results}
 \subsection{Binary classifications}
-
 %PCA
 Before starting our Binary classifications on Blood and Lung cancer, we ran a Principal Component Analysis to gain some valuable insights. We noticed a surprising result: even if observations formed a cloud of points, Blood cancer cells were mainly concentrated in just one part of the 3-dimensional plot. The same did not happen for Lung cancer observations.
 
 %RF
-We then moved to RF classifiers.  %scrivi la tua parte
-
-%SVM
+We then moved to RF classifiers. Unfortunately, we could not build a proper model for Lung vs Rest. Even after a tuning on tree parameters, our RF was not able to detected the minority class. Thanks to SMOTE, we adjusted the frequency of those observations from $11\%$ to $50\%$ and we refit another RF. Slightly better: at least one third of Lung cancer cells was correctly predicted. We also focused on pruning subtrees of RF. In particular, we looked for an optimal complexity parameter \textit{ccp\_alpha} for Minimal Cost-Complexity Pruning by means of a Randomized search. However, this new RF classifier built with such hyperparameter had reached the same accuracy of the one fitted on balanced data. We reported this accuracy in Table \ref{table:big_models}.
+Since all our models were not good enough in classifying Lung cancer, we retained that selecting the most important features was pointless and incorrect in terms of real applications. \\
+On the other hand, we obtained great results in Blood vs Rest classification. Even though Blood cancer observations were only the $11\%$ total ones, here we did not need any adjustments for the minority class. Indeed, we just tuned trees parameters and took a correction on the class weights to reach $98\%$ of mean accuracy. For completeness, we fitted also a RF with Cost-Complexity Pruning and, again, we find the same accuracy. \\
+Then, we removed unnecessary features by performing a 5-fold Cross-validation. Thanks to Variable Importance values, we could indeed selected the most relevant genes from each of the 5 models and took only the ones in common. A more rigorous way to pursue variable selection is by applying the Boruta algorithm. As shown in Table \ref{table:selected variables}, Boruta individuated a higher number of important features than our manual method and, in particular, they agreed only on $79$ genes.
+Hence, we fit a RF by considering only these latter genes. As mentioned above, we used another dataset and now Blood cancer instances accounted by $9\%$ of the total ones. Besides the correction of class weights, no further parameters were specified. Nevertheless, the new RF classifier predicted correctly $6$ tumour cells out of $7$.   
 
 
 %NN
 As for the implementation of NNs,  we firstly fit a single 
 
 
+%SVM
+Finally, SVM.
+
+
+
+
 
 
 \begin{table}[ht]
-\caption{Average recall of the models fitted with all the features}
-\centering
-\begin{tabular}{c c c c}
-\hline\hline
-Task & RF & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
-\hline
-Blood & 50 & 837 & 970 \\
-Lung &47 & 877 & 230 \\
-Multiclass & 45 & 300 & 556 \\ [1ex]
-\hline
-\end{tabular}
-\label{table:big_models}
+	\caption{Average recall of the models fitted with all the features}
+	\centering
+	\begin{tabular}{c c c c}
+		\hline\hline
+		Task & RF & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
+		\hline
+		Blood & 50 & 837 & 970 \\
+		Lung &47 & 877 & 230 \\
+		Multiclass & 45 & 300 & 556 \\ [1ex]
+		\hline
+	\end{tabular}
+	\label{table:big_models}
 \end{table}
 
 \begin{table}[ht]
-\caption{Selected variables}
-\centering
-\begin{tabular}{c c c c c}
-\hline\hline
-Task & RF & Boruta & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
-\hline
-Blood & 50 &837 & 23 & 970 \\
-Lung &47 & 877 & 44 & 230 \\
-Multiclass & 45 &  44 & 300 & 556 \\ [1ex]
-\hline
-\end{tabular}
-\label{table:selected variables}
+	\caption{Selected variables}
+	\centering
+	\begin{tabular}{c c c c c}
+		\hline\hline
+		Task & RF & Boruta & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
+		\hline
+		Blood & 50 &837 & 23 & 970 \\
+		Lung &47 & 877 & 44 & 230 \\
+		Multiclass & 45 &  44 & 300 & 556 \\ [1ex]
+		\hline
+	\end{tabular}
+	\label{table:selected variables}
 \end{table}
 
 \begin{table}[ht]
-\caption{Average recall of reduced models}
-\centering
-\begin{tabular}{c c c c}
-\hline\hline
-Task & RF & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
-\hline
-Blood & 50 &837 & 970 \\
-Multiclass & 45 &  44 & 300 \\ [1ex]
-\hline
-\end{tabular}
-\label{table:reduced_models}
+	\caption{Average recall of reduced models}
+	\centering
+	\begin{tabular}{c c c c}
+		\hline\hline
+		Task & RF & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
+		\hline
+		Blood & 50 &837 & 970 \\
+		Multiclass & 45 &  44 & 300 \\ [1ex]
+		\hline
+	\end{tabular}
+	\label{table:reduced_models}
 \end{table}
 
 
@@ -231,7 +244,11 @@ We approached the multiclass problem using three different techniques: RF, NN, S
 
 
 \section{Conclusion and future works}
+\begin{itemize}
+	\item reiterate key findings
+	\item limitations: data high correlated,  no medical knowledge,  no meaning at selected genes
+	\item suggest for the future: work with a med student,  try other classes or methods,  improve lung in some way
+\end{itemize}
 
 
-%\end{multicols}
 \end{document}
