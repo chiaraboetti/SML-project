@@ -213,14 +213,25 @@ Multiclass & 45 &  44 & 300 \\ [1ex]
 
 
 \subsection{Multiclass classification}
+When working with the multiclass problem we decided to remove the group "Eye" because it was a small heterogeneous group that even after tuning for RF and NN held the worst accuracy scores. "Eye" was a cluster of different types of cancer: this didn't create problems when we were using a One vs All aproach but with multiclass the effects of doing the cluster ourselves was mor evident.  
+So after removing the group "Eye", we did the same as before and split the dataset in two.
+
+\subsubsection{Random Forests}
+We considered two different random forests, the first with the same parametes as the one used in Blood vs All random forest. Looking at the confusion matrix we can see hat most of the missclassification errors are data points classified as Gastrointestinal. Gastrointestinal was the biggest cluster we consider with a lot of different cancers so the genes( i.e. the features) important can be different within the cluster. To limit the weight of Gastrointestinal we decided to tune by hand the class weights. In this way we solve two problems: we reduced the importance of the group Gastrointestinal and we achieved at least one correct classification in each class. At this point we used cross validation to select five models and we extracted the most important features by looking at their relative importance in every model subjected to their presence in every model. We set a threshold to obtain  $(\sim   1700)$ features and with this we created a reduced model that we fitted using the validation set we had created at the beginning.
+\subsubsection{SVM-Lasso}
+
+\subsubsection{Neural Networks}
+We first fitted a toy NN with only one hidden layer to see how the net worked.
+We then fitted three different NN: the first increasing by one the number of hidden layers, the second changing the loss function with the Focal loss and the third using again the Focal loss, but changing the alpha parameter w.r.t. the class percentage in the set.
+The three models held similar result with the second one being slightly more accurate. Once this NNs were fitted, we ranked the variable according to the Olden Importance measure, selected the first 1700 and used them to construct a reduced version of the classifier on the validation set.
+The increment in the number of feature used for fitting the reduced model w.r.t. the binary NN model was beacuse we are now trying to separate nine different classes so we need much more information than before.
+
+\section{Overall Results}
+We approached the multiclass problem using three different techniques: RF, NN, SVM-Lasso and all three methods gave us good results. We can't say the same for the reduced models: while NN maintain an overall good performance using the same models, the RF need to be retuned to reach a similar performance. 
 
 
 \section{Conclusion and future works}
-\begin{itemize}
-\item reiterate key findings
-\item limitations: data high correlated,  no medical knowledge,  no meaning at selected genes
-\item suggest for the future: work with a med student,  try other classes or methods,  improve lung in some way
-\end{itemize}
 
 
+%\end{multicols}
 \end{document}
