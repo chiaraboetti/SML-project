@@ -130,10 +130,19 @@ We started by fitting Random Forest (RF) models as they frequently performs well
 Intuitively, the random shuffling means that, on average, the shuffled variable has no predictive power. \\
 Hence, Variable Importance measures how much accuracy decreases because of removing a variable. Here, we used it to select the most important feature in two different ways:
 \begin{itemize}
-	\item \textit{Cross-validation}: we performed a 5-fold Cross-validation on the model and selected the top most important features of each model; % and finally averaged;
+	\item \textit{Cross-validation}: we performed a 5-fold Cross-validation on the model, averaged the importance vales and selected the top most important features;
 	\item \textit{Boruta algorithm}\footnote{Boruta algorithm: \url{https://www.researchgate.net/publication/220443685_Boruta_-_A_System_for_Feature_Selection}}: Boruta repeatedly measures feature importance then carries out statistical tests to screen out the features which are irrelevant. The procedure terminates when all features are either decisively relevant or decisively irrelevant. Simple scheme is drawn in Figure \ref{fig2}. 
 \end{itemize} 
 
+\subsection{Neural Networks}
+Neural Networks (NN) are efficient models to capture non-linear relationship between predictors and target variables. In this context, we trained NN with two hidden layers of width $400/500$ and $300$ respectively and we chose \textit{ReLU} as activation function for the hidden layer, \textit{sigmoid} and \textit{softmax} for the output layer of, respectively, binary and multiclass classifications. \\
+Given that the binary problems were a little unbalanced, we tried both the usual \textit{Cross Entropy} loss function and the \textit{Focal Loss}, defined as 
+\begin{equation*}
+FL(z) = \alpha \cdot (1 - z)^{\gamma} \log{z} \text{,  \hspace{3pt} with }z \in [0,1]  \text{ and } \alpha,  \gamma \geq 0
+\end{equation*}
+
+Note that \textit{Focal Loss} can be extended for dealing with multiclass classification tasks\footnote{Focal Loss: \url{https://arxiv.org/pdf/1708.02002.pdf}}. \\
+Once our NNs were fitted,  we ranked variables according to the Olden Importance measure\footnote{Olden Importance: \url{https://depts.washington.edu/oldenlab/wordpress/wp-content/uploads/2013/03/EcologicalModelling_2004.pdf}}, selected the first ones and trained a reduced version of the classifier on them. We chose Olden's importance as it can work with multile hidden layers and multiclass problems. 
 
 \subsection{SVM-Lasso}
 Support vector machines (SVM) are based on the idea of finding a hyperplane that best separate classes. Here, we combined this method with the classical Lasso penalty, so that the objective function to be minimized was:
@@ -142,31 +151,23 @@ Support vector machines (SVM) are based on the idea of finding a hyperplane that
 \end{equation*}
 The parameter $\lambda$ has been chosen via cross-validation. Thanks to Lasso penalty, we obtained parsity in predictors: some $w_i$ are shrunken all the way to zero, whereas the others identified important features. 
 
-\subsection{Neural Networks}
-Neural Networks (NN) are efficient models to capture non-linear relationship between predictors and target variables. In this context, we trained NN with two hidden layers of width 400 and 300 respectively and we chose \textit{ReLU} as activation function for the hidden layer, \textit{sigmoid} and \textit{softmax} for the output layer of, respectively, binary and multiclass classifications. \\
-Given that the binary problems were a little unbalanced, we tried both the usual \textit{Cross Entropy} loss function and the \textit{Focal Loss}, defined as 
-\begin{equation*}
-	FL(z) = \alpha \cdot (1 - z)^{\gamma} \log{z} \text{,  \hspace{3pt} with }z \in [0,1]  \text{ and } \alpha,  \gamma \geq 0
-\end{equation*}
-
-Note that \textit{Focal Loss} can be extended for dealing with multiclass classification tasks\footnote{Focal Loss: \url{https://arxiv.org/pdf/1708.02002.pdf}}. \\
-Once our NNs were fitted,  we ranked variables according to the Olden Importance measure\footnote{Olden Importance: \url{https://depts.washington.edu/oldenlab/wordpress/wp-content/uploads/2013/03/EcologicalModelling_2004.pdf}}, selected the first ones and trained a reduced version of the classifier on them.
-
 \section{Results}
 \subsection{Binary classifications}
 %PCA
 Before starting our Binary classifications on Blood and Lung cancer, we ran a Principal Component Analysis to gain some valuable insights. We noticed a surprising result: even if observations formed a cloud of points, Blood cancer cells were mainly concentrated in just one part of the 3-dimensional plot. The same did not happen for Lung cancer observations.
 
 %RF
-We then moved to RF classifiers. Unfortunately, we could not build a proper model for Lung vs Rest. Even after a tuning on tree parameters, our RF was not able to detected the minority class. Thanks to SMOTE, we adjusted the frequency of those observations from $11\%$ to $50\%$ and we refit another RF. Slightly better: at least one third of Lung cancer cells was correctly predicted. We also focused on pruning subtrees of RF. In particular, we looked for an optimal complexity parameter \textit{ccp\_alpha} for Minimal Cost-Complexity Pruning by means of a Randomized search. However, this new RF classifier built with such hyperparameter had reached the same accuracy of the one fitted on balanced data. We reported this accuracy in Table \ref{table:big_models}.
-Since all our models were not good enough in classifying Lung cancer, we retained that selecting the most important features was pointless and incorrect in terms of real applications. \\
-On the other hand, we obtained great results in Blood vs Rest classification. Even though Blood cancer observations were only the $11\%$ total ones, here we did not need any adjustments for the minority class. Indeed, we just tuned trees parameters and took a correction on the class weights to reach $98\%$ of mean accuracy. For completeness, we fitted also a RF with Cost-Complexity Pruning and, again, we find the same accuracy. \\
-Then, we removed unnecessary features by performing a 5-fold Cross-validation. Thanks to Variable Importance values, we could indeed selected the most relevant genes from each of the 5 models and took only the ones in common. A more rigorous way to pursue variable selection is by applying the Boruta algorithm. As shown in Table \ref{table:selected variables}, Boruta individuated a higher number of important features than our manual method and, in particular, they agreed only on $79$ genes.
-Hence, we fit a RF by considering only these latter genes. As mentioned above, we used another dataset and now Blood cancer instances accounted by $9\%$ of the total ones. Besides the correction of class weights, no further parameters were specified. Nevertheless, the new RF classifier predicted correctly $6$ tumour cells out of $7$.   
+We then moved to RF classifiers. Unfortunately, we could not build a proper model for Lung vs Rest. Even after a tuning on tree parameters, our RF was not able to detected the minority class. Thanks to SMOTE, we adjusted the frequency of those observations from $11\%$ to $50\%$ and the refit another RF. Slightly better: at least one third of Lung cancer cells was correctly predicted. We also focused on pruning subtrees of RF. In particular, we looked for an optimal complexity parameter \textit{ccp\_alpha} for Minimal Cost-Complexity Pruning by means of a Randomized search. However, this new RF classifier had reached the same accuracy of before. We reported the respective average recall in Table \ref{table:big_models}. Since all our models were not good enough in classifying Lung cancer, we retained that selecting the most important features was pointless and incorrect in terms of real applications. \\
+On the other hand, we obtained great results in Blood vs Rest classification. Even though Blood cancer observations were only the $11\%$ total ones, here we did not need any adjustments for the minority class. Indeed, we just tuned trees parameters and took a correction on the class weights to reach $98\%$ of mean accuracy. For completeness, we fitted also a RF with Cost-Complexity Pruning and we find again the same accuracy. \\
+Then, we removed unnecessary features by performing a 5-fold Cross-validation. Thanks to Variable Importance values, we could indeed selected the most relevant genes for each of the 5 models. As more rigorous way to pursue variable selection, we applied Boruta algorithm, too. As shown in Table \ref{table:selected variables}, Boruta individuated a higher number of important features than our manual method and, in particular, they agreed only on $84$ genes.
+Hence, we fitted a RF by considering only these latter genes. As mentioned above, we used another dataset and now Blood cancer instances accounted by $9\%$ of the total ones. Besides the correction of class weights, no further parameters were specified. Nevertheless, the new RF classifier predicted correctly $6$ tumour cells out of $7$.   
 
 
 %NN
-As for the implementation of NNs,  we firstly fit a single 
+Let us explore our NN models. After several trials and different tuning, the best NN for the Lung vs Rest classification was obtained by using the \textit{Focal Loss} function. Here, we balanced our dataset by means of the Random Under Sampler but we did not reach the accuracy we hoped for. In fact, two third of Lung cancer instances were correctly classified but at the cost of getting many false positive predictions. Hence, we did not select the most important features for the same motivations as before. \\
+Not surprisingly, NN classifier for Blood vs Rest provided an excellent performance. After balancing again our dataset, we defined the model with only two hidden layers and \textit{Cross Entropy} loss function. Then, all Blood cancer instances were classified rightly and almost none misclassification error occurred. \\
+Furthermore, we selected the most important genes ranked according to Olden's importance. Since NN are especially suitable in handling high-dimensional data, decided to keep more features than RF and try the simplest NN model, i.e. built as a "vanilla" neural net (one single hidden layer). As result, we reached an accuracy of $98.8\%$, classifying correctly all Blood cancer cells.
+
 
 
 %SVM
@@ -177,45 +178,44 @@ Finally, SVM.
 
 
 
-\begin{table}[ht]
+\begin{table}[h!]
 	\caption{Average recall of the models fitted with all the features}
 	\centering
-	\begin{tabular}{c c c c}
+	\begin{tabular}{c c c}
 		\hline\hline
-		Task & RF & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
+		Task & RF & NN \\ [0.5ex] % inserts table %heading
 		\hline
-		Blood & 50 & 837 & 970 \\
-		Lung &47 & 877 & 230 \\
-		Multiclass & 45 & 300 & 556 \\ [1ex]
+		Blood & 0.977  & 0.986 \\
+		Lung & 0.649  & 0.632 \\
+		Multiclass & --- & --- \\ [1ex]
 		\hline
 	\end{tabular}
 	\label{table:big_models}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[h!]
 	\caption{Selected variables}
 	\centering
 	\begin{tabular}{c c c c c}
 		\hline\hline
 		Task & RF & Boruta & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
 		\hline
-		Blood & 50 &837 & 23 & 970 \\
-		Lung &47 & 877 & 44 & 230 \\
-		Multiclass & 45 &  44 & 300 & 556 \\ [1ex]
+		Blood & 109 & 118 & 108 & 300 \\
+		Multiclass & --- &  --- & --- & --- \\ [1ex]
 		\hline
 	\end{tabular}
 	\label{table:selected variables}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[h!]
 	\caption{Average recall of reduced models}
 	\centering
 	\begin{tabular}{c c c c}
 		\hline\hline
 		Task & RF & SVM-Lasso & NN \\ [0.5ex] % inserts table %heading
 		\hline
-		Blood & 50 &837 & 970 \\
-		Multiclass & 45 &  44 & 300 \\ [1ex]
+		Blood & 0.929 & --- & 0.993 \\
+		Multiclass & --- &  --- & --- \\ [1ex]
 		\hline
 	\end{tabular}
 	\label{table:reduced_models}
@@ -239,9 +239,6 @@ We then fitted three different NN: the first increasing by one the number of hid
 The three models held similar result with the second one being slightly more accurate. Once this NNs were fitted, we ranked the variable according to the Olden Importance measure, selected the first 1700 and used them to construct a reduced version of the classifier on the validation set.
 The increment in the number of feature used for fitting the reduced model w.r.t. the binary NN model was beacuse we are now trying to separate nine different classes so we need much more information than before.
 
-\section{Overall Results}
-We approached the multiclass problem using three different techniques: RF, NN, SVM-Lasso and all three methods gave us good results. We can't say the same for the reduced models: while NN maintain an overall good performance using the same models, the RF need to be retuned to reach a similar performance. 
-
 
 \section{Conclusion and future works}
 \begin{itemize}
@@ -249,6 +246,8 @@ We approached the multiclass problem using three different techniques: RF, NN, S
 	\item limitations: data high correlated,  no medical knowledge,  no meaning at selected genes
 	\item suggest for the future: work with a med student,  try other classes or methods,  improve lung in some way
 \end{itemize}
+
+We approached the multiclass problem using three different techniques: RF, NN, SVM-Lasso and all three methods gave us good results. We can't say the same for the reduced models: while NN maintain an overall good performance using the same models, the RF need to be retuned to reach a similar performance. 
 
 
 \end{document}
