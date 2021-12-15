@@ -150,27 +150,26 @@ Note that \textit{Focal Loss} can be extended for dealing with multiclass classi
 Once our NNs were fitted,  we ranked variables according to the Olden Importance measure\footnote{Olden Importance: \url{https://depts.washington.edu/oldenlab/wordpress/wp-content/uploads/2013/03/EcologicalModelling_2004.pdf}}, selected the first ones and trained a reduced version of the classifier on them. We used Olden's importance as it can work with multiple hidden layers and multiclass problems. 
 
 \section{Results}
-\subsection{Binary classifications}
 %PCA
 Before starting our Binary classifications on Blood and Lung cancer, we ran a Principal Component Analysis to gain some valuable insights. We noticed a surprising result: even if observations formed a cloud of points, Blood cancer cells were mainly concentrated in just one part of the 3-dimensional plot. The same did not happen for Lung cancer observations.
 
-\subsubsection{Random Forests}
-%We then moved to RF classifiers.
-Unfortunately, we could not build a proper model for Lung vs Rest. Even after a tuning on tree parameters, our RF was not able to detected the minority class. Thanks to SMOTE, we adjusted the frequency of those observations from $11\%$ to $50\%$ and the refitted RF gave us a slightly better result: at least one third of Lung cancer cells was correctly predicted. We also focused on pruning subtrees. In particular, we carried out a Randomized search and found an optimal complexity parameter for the Minimal Cost-Complexity Pruning. However, this new RF classifier had reached the same accuracy of before. We reported the respective average recall in Table \ref{table:big_models}. \\
-Since all our models were not good enough in classifying Lung cancer, we retained that selecting the most important features was pointless and incorrect in terms of real applications. \\
-On the other hand, we obtained great results in Blood vs Rest classification. Even though Blood cancer observations were only the $11\%$ of the total, we did not need any adjustments for the minority class. Indeed, thanks to proper tuning on trees parameters and a correction on class weights, we reached $98\%$ of mean accuracy. For completeness, we fitted also a RF with Cost-Complexity Pruning and we find the same accuracy. \\
-Then, we removed unnecessary features by performing a 5-fold Cross-validation. Thanks to Variable Importance values, we could indeed selected the most relevant genes for each of the 5 models. As more rigorous way to pursue variable selection, we applied Boruta algorithm, too. As shown in Table \ref{table:selected variables}, Boruta individuated a higher number of important features than our manual method and, in particular, they agreed only on $84$ genes. As mentioned above, we fitted a RF on a new reduced dataset, where cancer instances accounted by $9\%$ of the total. Besides weighting classes, no further parameters were specified and, nevertheless, this RF classifier predicted correctly $6$ tumour cells out of $7$.   
+\subsection{Binary classifications: Blood vs Rest}
+we obtained great results in Blood vs Rest classification.
+Let us start with RF classifier. Even though Blood cancer observations were only the $11\%$ of the total, we did not need any adjustments for the minority class. Indeed, thanks to proper tuning on trees parameters and a correction on class weights, we reached $98\%$ of mean accuracy. For completeness, we fitted also a RF with Cost-Complexity Pruning and we find the same accuracy. \\
+Then, we removed unnecessary features by performing a 5-fold Cross-validation. Thanks to Variable Importance values, we could indeed selected the most relevant genes for each of the 5 models. As more rigorous way to pursue variable selection, we applied Boruta algorithm, too. As shown in Table \ref{table:selected variables}, Boruta individuated a higher number of important features than our manual method and, in particular, they agreed only on $84$ genes. As mentioned above, we fitted RFs on new reduced dataset, where cancer instances accounted by $9\%$ of the total. Besides weighting classes, no further parameters were specified and, nevertheless, both RF classifiers predicted correctly $6$ tumour cells out of $7$.  
 
-
-\subsubsection{SVM-Lasso}
+Not surprisingly, NN classifier for Blood vs Rest did also an excellent performance. After balancing again our dataset, we build the model with only two hidden layers and \textit{Cross Entropy} loss function. Then, all Blood cancer instances were classified rightly and almost none misclassification error occurred. \\
+Furthermore, we selected the most important genes ranked according to Olden's importance. Since NN are especially suitable in handling high-dimensional data, decided to keep more features than RF and try the simplest NN model, i.e. built as a "vanilla" neural net (one single hidden layer). As result, we reached an accuracy of $98.8\%$, classifying correctly all Blood cancer cells.
 %Let us explore our SVM models.
 
 
-\subsubsection{Neural Networks}
-After several trials and different tuning, we obtained the best NN for the Lung vs Rest classification by using the \textit{Focal Loss} function. Here, we balanced our dataset by means of the Random Under Sampler but we did not reach the accuracy we hoped for. In fact, two third of Lung cancer instances were correctly classified but at the cost of getting many false positive predictions. Hence, we did not select the most important features for the same motivations as before. 
-Not surprisingly, NN classifier for Blood vs Rest provided an excellent performance. After balancing again our dataset, we build the model with only two hidden layers and \textit{Cross Entropy} loss function. Then, all Blood cancer instances were classified rightly and almost none misclassification error occurred. \\
-Furthermore, we selected the most important genes ranked according to Olden's importance. Since NN are especially suitable in handling high-dimensional data, decided to keep more features than RF and try the simplest NN model, i.e. built as a "vanilla" neural net (one single hidden layer). As result, we reached an accuracy of $98.8\%$, classifying correctly all Blood cancer cells.
+\subsubsection{Binary classifications: Lung vs Rest}
+Unfortunately, we could not build a proper model for Lung vs Rest. Even after a tuning on tree parameters, our RF was not able to detected the minority class. Thanks to SMOTE, we adjusted the frequency of those observations from $11\%$ to $50\%$ and the refitted RF gave us a slightly better result: at least one third of Lung cancer cells was correctly predicted. We also focused on pruning subtrees. In particular, we carried out a Randomized search and found an optimal complexity parameter for the Minimal Cost-Complexity Pruning. However, this new RF classifier had reached the same accuracy of before. We reported the respective average recall in Table \ref{table:big_models}. \\
+Since all our models were not good enough in classifying Lung cancer, we retained that selecting the most important features was pointless and incorrect in terms of real applications. 
 
+After several trials and different tuning, we obtained the best NN for the Lung vs Rest classification by using the \textit{Focal Loss} function. Here, we balanced our dataset by means of the Random Under Sampler but we did not reach the accuracy we hoped for. In fact, two third of Lung cancer instances were correctly classified but at the cost of getting many false positive predictions. Hence, we did not select the most important features for the same motivations as before. 
+
+%Let us explore our SVM models.
 
 
 
