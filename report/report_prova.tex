@@ -65,7 +65,7 @@ urlcolor=blue
 \setcounter{secnumdepth}{2}
 \pagestyle{plain} % stile pagina (header, numerazioni)
 
-\centerline {\includegraphics[width=2cm]{logo.jpg}}
+% \centerline {\includegraphics[width=2cm]{logo.jpg}}
 \begin{center}
 	Università degli Studi di Torino - M.Sc.  in Stochastic and Data Science - A.Y.  2021/2022 \\
 	\Large { Final project of Statistical Machine Learning (MAT0043)}
@@ -78,13 +78,11 @@ urlcolor=blue
 
 %____________________________________________________________________________________________________________________________
 
-The purpose of our project is to work on a high-dimensional genomics data and find a relatively small number of genes to predict the cancer type of a given tumorous cells. This is known as Genes Selection for Cancer Classification and it is in line with many up-to-date problems of applied medicine. \\
-Our dataset contains $1.032$ cancerous cells and their knock-out probabilities, i.e.  the probabilities of stopping the growth of tumor by inhibiting one of the $\sim 17.000$ genes.  Each cell line is characterized by one of 10 possible cancer labels: Eye, Gastrointestinal, Gynecologic, Musculoskeletal, Neurological, Breast, Head-Neck, Blood, Genitourinary and Lung.  We explore in detail three Features Selection algorithms: Random Forests (RF) combined with Feature Importance,  Lasso-SVM and Neural Networks (NN) combined with Olden Importance.  We study two Binary classification problems (Blood cancer vs Rest, Lung cancer vs Rest) and the Multiclass problem. Besides Lung models, we achieve satisfying classification accuracies and we are able to select up to $10\%$ of genes which are used to fit reduced versions of the previous models.  \\
-Our methodologies have worked incredibly well on Blood cancer,  as we have reached almost $100\%$ accuracy with the reduced classifier, but failed miserably on Lung cancer. Therefore,  it seems that classifying cancer type from an extremely small set of genes depends on the cancer type itself.  
+The purpose of our project is to work on a high-dimensional genomics data and find a relatively small number of genes to predict the cancer type of a given tumorous cells. This is known as Genes Selection for Cancer Classification and it is in line with many up-to-date problems of applied medicine.  Our dataset contained $1.032$ cancerous cells and their knock-out probabilities, i.e.  the probabilities of stopping the growth of tumor by inhibiting one of the $\sim 17.000$ genes.  We explored in detail three Features Selection algorithms,  namely Random Forests (RF) combined with Feature Importance,  Lasso-SVM and Neural Networks (NN) combined with Olden,  and found that the possibility of classifying the cancer type from an extremely small set of genes mainly depends on the cancer type itself.  
 
 
 \section{Introduction}
-Cancer is a complex disease characterized by the uncontrolled growth of abnormal cells anywhere in the body. These abnormal cells are extremely invasive and we usually identify them with the name of their original tissue (for instance, breast cancer, lung cancer,  brain cancer, etc.).  In recent years,  medicine has made a great step forward in finding new and efficient therapies for different diseases,  including cancer.  Thanks to numerous advances in technology,  collecting huge amount of data is no longer an issue,  so that one can exploit this information to define personalized treatments for patients.  In this regards,  the DepMap project\footnote{DepMap Portal: \url{https://depmap.org/portal/} } and,  in particular,  the Achilles project\footnote{Achilles Project: \url{https://depmap.org/portal/achilles/} } aim to use genome-wide screens to collect data regarding mutations of cancerous cells,  identify essential genes and report vulnerabilities across hundreds of human cancers.  \\
+Cancer is a complex disease characterized by the uncontrolled growth of abnormal cells anywhere in the body.  In recent years,  medicine has made a great step forward in finding new and efficient therapies for different diseases,  including cancer.  Thanks to numerous advances in technology,  collecting huge amount of data is no longer an issue,  so that one can exploit this information to define personalized treatments for patients.  In this regards,  the DepMap project\footnote{DepMap Portal: \url{https://depmap.org/portal/} } and,  in particular,  the Achilles project\footnote{Achilles Project: \url{https://depmap.org/portal/achilles/} } aim to use genome-wide screens to collect data regarding mutations of cancerous cells,  identify essential genes and report vulnerabilities across hundreds of human cancers.  \\
 
 Many researches are currently using DepMap datasets to identify a small number of genes which are responsible of cancers growth\footnote{Background material: \url{https://depmap.org/portal/publications/}}. This procedure is often driven by medical knowledge,  which we do not possess,  together with some rough measures of importance.  Being Maths student, we instead based our research on statistical models and on the hypothesis that "if a given classifier is able to distinguish different types of cancer,  then the most relevant genes are the most important features for that classifier" (the meaning of \textit{important} will be clarified later).  Of course,  selecting few truly significant genes has outstanding implications in the medical field: building faster diagnosis tools and synthesizing less toxic drugs are only two examples. 
 
@@ -96,12 +94,13 @@ We use two public datasets from the DepMap Public 21Q3 database,  released on Au
 	\item \textit{sample\_info.csv}, containing cell lines information,  such as primary disease and sample collection site.
 \end{itemize}
 Data were collected from real patients and successively processed,  so that element $(i, j)$ of this $(1.032 \times 17.393)$-data frame is the probability that knocking out gene $j$ has a real depletion effect on the $i$-th cell.
+By grouping the various cancer types in 10 classes according to common medical knowledge\footnote{Cancer types grouped by body location: \url{https://www.cancer.gov/types/by-body-location}},  we obtain the grouping reported in Figure \ref{fig1}. 
 
 \begin{wrapfigure}{r}{0.65\textwidth}
 	\includegraphics[width=0.65\textwidth]{plot1.png}
 	\captionof{figure}{Cancer classes}\label{fig1}
 \end{wrapfigure}
-By grouping the various cancer types in 10 classes according to common medical knowledge\footnote{Cancer types grouped by body location: \url{https://www.cancer.gov/types/by-body-location}},  we obtain the grouping reported in Figure \ref{fig1}. \\
+
 "Eye" is the smallest one as there were only $16$ observations, $5$ of which labelled as "Enginereed", i.e.  synthetically modified samples. On the other hand, "Gastrointestinal" is the largest group and it comprehends $7$ kinds of cancer,  making this group quite heterogeneous. \\
 We investigate two Binary classification problems,  Blood vs Rest and Lung vs Rest, and the Multiclass problem. We choose "Lung" because of the nature of such a class: it was the most numerous group composed by only one type of cancer samples. The choice of "Blood" is instead driven by some underlying biological knowledge: Blood cancer is quite different from other tumours because
 \begin{itemize}
@@ -167,7 +166,7 @@ Unfortunately,  we could not build a proper model for Lung vs Rest.  Even after 
   \hline\hline
   Task & RF & NN \\ [0.5ex] % inserts table %heading
   \hline
-  Blood & 0.977  & 0.986 \\
+  Blood & 0.991  & 0.986 \\
   Lung & 0.649  & 0.632 \\
   Multiclass & 0.655 & 0.702 \\ [1ex]
   \hline
@@ -217,8 +216,9 @@ Finally, \textbf{NNs}. We fit three different NNs: one using the \textit{CrossEn
 
 
 \section{Conclusion and future works}
-We can conclude that classifying cancer type from an extremely small set of genes heavy rely on the cancer type itself: our classifiers are able to distinguish Blood cancer almost perfectly but not Lung Cancer. Notice that this thesis is also supported by the results on the multiclass task where the significant decrease of the average recall can be attributed to bad-behaved classes such as Lung (again!) and Gastrointestinal.  Thus,  a future study might focus on these classes. 
-From a more general perspective,  we admit that we do not have any hint about the meaning of selected genes and what is their role in the DNA.  Hence, it could be interesting to involve Med students into a similar project and base our work on a more solid medical knowledge.  
+We can conclude that classifying cancer type from an extremely small set of genes heavy rely on the cancer type itself: our classifiers are able to distinguish Blood cancer almost perfectly but not Lung Cancer.  Notice that this thesis is also supported by the results of the multiclass task where the significant decrease of the average recall can be attributed to bad-behaved classes such as Lung (again!) and Gastrointestinal.  Thus,  a future study might focus on these classes and try to find models which are able to recognize them.  From a more general perspective,  we admit that we do not have any hint about the meaning of selected genes and what is their role in the DNA.  Hence, it could be interesting to involve Med students into a similar project and base our work on a more solid medical knowledge.   
+
+As stated in the Introduction,  this project could have several implications and make a positive impact on people's lives.  For example,  if one were able to achieve high recall on every class,  it can be used to synthesize less toxic drugs or to build fast diagnostic tools when sequencing DNA will be a question of minutes.  In this regard,  one must include also the class "No Cancer" which was another constraint we had to face.  Indeed,  the DepMap project provides data for tumorous cells only but it could be of interests to repeat the study including also healthy cells.  
 
 
 \end{document}
