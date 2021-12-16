@@ -70,3 +70,10 @@ my_model = multiSVM(train)
 pred_y = multiSVM.predict(test_X, my_model)
 confusionMatrix(factor(pred_y), factor(test_y))
 
+non_zero = 0
+for (model in my_model){
+  non_zero = non_zero + model$weights
+}
+sum(non_zero != 0)
+
+
