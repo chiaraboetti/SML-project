@@ -146,7 +146,7 @@ In this context, we train NN with two hidden layers of width $400/500$ and $300$
 
 Since the Binary problems are a little unbalanced, we try both the usual \textit{Cross Entropy} loss function and the \textit{Focal Loss}, defined as 
 \begin{equation*}
-	FL(z) = \alpha \cdot (1 - z)^{\gamma} \log{z} \text{, with }z \in [0,1]  \text{ and } \alpha,  \gamma \geq 0
+	FL(z) = - \alpha \cdot (1 - z)^{\gamma} \log{z} \text{, with }z \in [0,1]  \text{ and } \alpha,  \gamma \geq 0
 \end{equation*}
 Special cases of \textit{Focal Loss} are drawn in Figure \ref{fig3}. \\
 In particular, \textit{Focal Loss} can be extended and used in Multiclass classification tasks\footnote{Focal Loss: \url{https://arxiv.org/pdf/1708.02002.pdf}}. \\
