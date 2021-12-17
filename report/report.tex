@@ -78,7 +78,7 @@ urlcolor=blue
 
 %____________________________________________________________________________________________________________________________
 
-The purpose of our project is to work on a high-dimensional genomics dataset and find a relatively small number of genes to predict the cancer type of a given tumorous cell. This is known as Genes Selection for Cancer Classification and it is in line with many up-to-date researches in applied medicine.  Our dataset contained $1.032$ cancerous cells and their knock-out probabilities, i.e.  the probabilities of stopping the growth of the tumor by inhibiting one of the $\sim 17.000$ studied genes.  We explore in detail three Features Selection algorithms,  namely Random Forests (RF) combined with Feature Importance,  Lasso-SVM and Neural Networks (NN) combined with Olden,  and find that the possibility of classifying the cancer type from an extremely small set of genes mainly depends on the cancer type itself.  
+The purpose of our project is to work on a high-dimensional genomics dataset and find a relatively small number of genes to predict the cancer type of a given tumorous cell. This is known as Genes Selection for Cancer Classification and it is in line with many up-to-date researches in applied medicine.  Our dataset contained $1.032$ cancerous cells and their knock-out probabilities, i.e.  the probabilities of stopping the growth of the tumor by inhibiting one of the $\sim 17.000$ studied genes.  We explore in detail three Features Selection algorithms,  namely Random Forests (RF) combined with Feature Importance, SVM-Lasso and Neural Networks (NN) combined with Olden,  and find that the possibility of classifying the cancer type from an extremely small set of genes mainly depends on the cancer type itself.  
 
 
 \section{Introduction}
@@ -132,6 +132,7 @@ Support vector machines (SVM) are based on the idea of finding a hyperplane that
 \dfrac{1}{n} \sum_{i=1}^n hingeLoss(y_i(x_i w + t)) + \lambda ||w||_1  \qquad	\text{where} \qquad  hingeLoss(z) = max\{0, 1-z\}
 \end{equation*}
 The parameter $\lambda$ is chosen via cross-validation. Thanks to Lasso penalty, we obtain sparsity in predictors: some $w_i$ are shrunken all the way to zero while the others identify important features. 
+\medskip
 
 \subsection{Neural Networks}
 Neural Networks (NN) are efficient models to capture non-linear relationships between predictors and target variables.
@@ -150,6 +151,7 @@ Special cases of these functions are drawn in Figure \ref{fig3}. \\
 In particular, \textit{Focal Loss} can be extended and used in Multiclass classification tasks\footnote{Focal Loss: \url{https://arxiv.org/pdf/1708.02002.pdf}}.
 
 Once our NNs have been fitted, we rank variables according to the Olden Importance measure\footnote{Olden Importance: \url{https://depts.washington.edu/oldenlab/wordpress/wp-content/uploads/2013/03/EcologicalModelling_2004.pdf}},  select a few hundreds of them and train a reduced version of the classifiers. 
+\medskip
 
 \subsection{Methodology}
 Notice that NN and RF are Wrapper Feature Selection methods and so that our methodology is characterized by:
